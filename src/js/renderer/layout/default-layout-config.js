@@ -4,13 +4,19 @@ export const defaultLayoutConfig = {
     content: [
       {
         type: "column",
-        width: 15,
+        width: 22,// 15,
         content: [
           {
-            type: "component", // For debug purposes
+            type: "component",
             componentType: "Project View",
             // id: createId(),
             height: 22,
+          },
+          {
+            type: "component",
+            componentType: "Inspector",
+            // id: createId(),
+            height: 11,
           },
         ],
       },

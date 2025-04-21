@@ -4,7 +4,7 @@ import { CausalViewDataManager } from "../causal-view/causal-view-data-manager";
 const eventBus = require("js-event-bus")();
 
 /** Manages project data, that will be passed to the main process */
-export class DataManager extends EventTarget {
+export class CausalBundleDataManager extends EventTarget {
   api;
   currentCausalViewDataManager;
   projectData;
@@ -19,7 +19,6 @@ export class DataManager extends EventTarget {
   }
 
   get blockConventions() {
-    console.log("get block conventions. project data: ", this.projectData);
     return this.projectData.blockConventions ?? [];
   }
 
@@ -39,6 +38,68 @@ export class DataManager extends EventTarget {
   setCurrentCausalViewDataManager(causalViewDataManager) {
     this.currentCausalViewDataManager = causalViewDataManager;
   }
+
+  //#region Causal Models
+  addNewCausalModel(name) {
+    this.projectData.addNewCausalModel(name);
+  }
+
+  isDefaultMainModel(name) {
+    return this.projectData.isDefaultMainModel(name);
+  }
+
+  setAsDefaultMainModel(name) {
+    this.projectData.setAsDefaultMainModel(name);
+  }
+
+  renameCausalModel(oldName, newName) {
+    this.projectData.renameCausalModel(oldName, newName);
+  }
+
+  isCausalModelNameAlreadyUsed(name) {
+    return this.projectData.isCausalModelNameAlreadyUsed(name);
+  }
+
+  removeCausalModel(name) {
+    this.projectData.removeCausalModel(name);
+  }
+  //#endregion
+
+  //#region Block Conventions
+  addNewBlockConvention(name) {
+    this.projectData.addNewBlockConvention(name);
+  }
+
+  renameBlockConvention(oldName, newName) {
+    this.projectData.renameBlockConvention(oldName, newName);
+  }
+
+  isBlockConventionNameAlreadyUsed(name) {
+    return this.projectData.isBlockConventionNameAlreadyUsed(name);
+  }
+
+  removeBlockConvention(name) {
+    this.projectData.removeBlockConvention(name);
+  }
+  //#endregion
+
+  //#region Block Cause Conventions
+  addNewBlockCausesConvention(name) {
+    this.projectData.addNewBlockCausesConvention(name);
+  }
+
+  renameBlockCausesConvention(oldName, newName) {
+    this.projectData.renameBlockCausesConvention(oldName, newName);
+  }
+
+  isBlockCausesConventionNameAlreadyUsed(name) {
+    return this.projectData.isBlockCausesConventionNameAlreadyUsed(name);
+  }
+
+  removeBlockCausesConvention(name) {
+    this.projectData.removeBlockCausesConvention(name);
+  }
+  //#endregion
 
   #initSaveData(api) {
     api.onSaveData((event, { dataToSaveId, title }) => {
@@ -64,7 +125,7 @@ export class DataManager extends EventTarget {
       facts,
       declaredBlocks: blocks,
       nodesData,
-      name: "name"  // TODO:
+      name: this.currentCausalViewDataManager.causalModelName
     };
 
     return [
@@ -81,21 +142,7 @@ export class DataManager extends EventTarget {
 
       this.projectData = new ProjectData(projectData);
 
-      //   const causalViewData = RendererDataManager.#toCausalViewData(projectData);
-      //   this.causalViewManager.reset(causalViewData);
-
       eventBus.emit("dataOpened", null, { projectData: this.projectData });
-
-      // const dataOpened = new Event("dataOpened");
-      // dataOpened.projectData = this.projectData;
-      // this.dispatchEvent(dataOpened);
     });
   }
-
-  // static #toCausalViewData(projectData) {
-  //   return CausalViewDataUtils.factsAndNodesDataToCausalViewData(
-  //     projectData.facts,
-  //     projectData.nodesData
-  //   );
-  // }
 }

@@ -7,8 +7,8 @@ import { ZoomManager } from "./render/zoom-manager.js";
 import { ViewRenderer } from "./render/view-renderer.js";
 import { DragAndDropManager } from "./drag-and-drop-manager.js";
 
-const nodeWidth = 140;
-const nodeHeight = 40;
+export const nodeWidth = 140;
+export const nodeHeight = 40;
 
 /**
  * Displays interactive causal view elements and provides some of their common events

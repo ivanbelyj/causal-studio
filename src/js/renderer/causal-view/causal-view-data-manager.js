@@ -6,51 +6,28 @@ import { CausalViewDataUtils } from "./causal-view-data-utils";
  * (such as saving and opening data)
  */
 export class CausalViewDataManager {
+  #causalModelName;
   init({ api, causalViewManager }) {
     this.causalViewManager = causalViewManager;
-    // this.#initSaveData(api);
-    // this.#initOpenData(api);
   }
 
-  // #initSaveData(api) {
-  //   api.onSaveData((event, { dataToSaveId, title }) => {
-  //     const { facts, nodesData } = this.#getFactsAndNodesData();
+  set causalModelName(value) {
+    this.#causalModelName = value;
+  }
 
-  //     event.sender.send(`data-to-save-${dataToSaveId}`, {
-  //       dataToSave: ProjectData.createProjectData({
-  //         ...(this.projectData ?? {}),
-  //         facts,
-  //         nodesData,
-  //       }),
-  //       title,
-  //     });
-  //   });
-  // }
+  get causalModelName() {
+    return this.#causalModelName;
+  }
 
   getModelNodesData() {
-    console.log("dkjfdkfj", this.causalViewManager.structure.getNodesData())
     return CausalViewDataUtils.causalViewDataToModelNodesData(
       this.causalViewManager.structure.getNodesData()
     );
   }
 
-  // #initOpenData(api) {
-  //   api.onOpenData((event, projectData) => {
-  //     console.log("opened project data: ", projectData);
-  //     const causalViewData =
-  //       CausalViewDataManager.#toCausalViewData(projectData);
-  //     this.causalViewManager.reset(causalViewData);
-  //   });
-  // }
-
-  // static #toCausalViewData(projectData) {
-  //   return CausalViewDataUtils.factsAndNodesDataToCausalViewData(
-  //     projectData.facts,
-  //     projectData.nodesData
-  //   );
-  // }
-
   getCausalViewData() {
     return this.causalViewManager.structure.getNodesData();
   }
+
+
 }

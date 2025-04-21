@@ -2,13 +2,22 @@
 // but "nodes data" can also mean some data about nodes (color, size, etc.)
 // that is separated from the causal model fact
 export class CausalViewDataUtils {
-  static factsAndNodesDataToCausalViewData(facts, nodesData) {
+  static factsAndNodesDataToCausalViewData(causalModel) {
+    const facts = causalModel.facts;
+    const nodesData = causalModel.nodesData;
+    const declaredBlocks = causalModel.declaredBlocks;
+
+    const findNodeData = (nodeId) => nodesData?.find(
+      (nodeData) => nodeData.nodeId === nodeId
+    );
+
     return facts.map((fact) => {
-      const nodeData = nodesData?.find(
-        (nodeData) => nodeData.factId === fact.id
-      );
+      const nodeData = findNodeData(fact.id);
       return { fact, ...(nodeData ?? {}) };
-    });
+    }).concat(declaredBlocks.map((block) => {
+      const nodeData = findNodeData(block.id);
+      return { block, ...(nodeData ?? {}) };
+    }));
   }
 
   static causalViewDataToModelNodesData(causalViewData) {

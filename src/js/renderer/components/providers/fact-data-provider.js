@@ -5,15 +5,12 @@ import { NodeDataProvider } from "./node-data-provider";
 
 export class FactDataProvider extends NodeDataProvider {
     constructor(undoRedoManager, causesChangeManager) {
-        super(undoRedoManager, causesChangeManager);
-    }
-
-    get #causalFact() {
-        return this._data?.fact;
+        super(undoRedoManager);
+        this.causesChangeManager = causesChangeManager;
     }
 
     getInnerToMutate() {
-        return this.#causalFact;
+        return this._data?.fact;
     }
 
     getInner() {
@@ -21,15 +18,15 @@ export class FactDataProvider extends NodeDataProvider {
     }
 
     getFact() {
-        return this._getFrozenOrNull(this.#causalFact);
+        return this._getFrozenOrNull(this.getInnerToMutate());
     }
 
-    #getWeights(causalFact) {
-        return causalFact?.weights;
+    #getWeights(nodeData) {
+        return nodeData.fact?.weights;
     }
 
-    #setInitialWeights(causalFact) {
-        causalFact.weights = [];
+    #setInitialWeights(nodeData) {
+        nodeData.fact.weights = [];
     }
 
     addNewWeightEdge() {
@@ -38,12 +35,12 @@ export class FactDataProvider extends NodeDataProvider {
         //   () => this.#addWeightEdge(newEdge),
         //   () => this.#removeWeightEdge(newEdge)
         // );
-        const causalFact = this.#causalFact;
+        const nodeData = this._data;
 
         CommandUtils.executeUndoRedoActionCommand(
             this.undoRedoManager,
-            this.#addWeightEdge.bind(this, causalFact),
-            this.#removeWeightEdge.bind(this, causalFact),
+            this.#addWeightEdge.bind(this, nodeData),
+            this.#removeWeightEdge.bind(this, nodeData),
             this.#createDefaultWeightEdge(null)
         );
     }
@@ -55,28 +52,30 @@ export class FactDataProvider extends NodeDataProvider {
         };
     }
 
-    #addWeightEdge(causalFact, newWeight) {
-        if (!this.#getWeights(causalFact)) {
-            this.#setInitialWeights(causalFact);
+    #addWeightEdge(nodeData, newWeight) {
+        if (!this.#getWeights(nodeData)) {
+            this.#setInitialWeights(nodeData);
         }
-        const weights = this.#getWeights(causalFact);
+        const weights = this.#getWeights(nodeData);
 
         weights.push(newWeight);
 
         if (newWeight.causeId)
-            this.causesChangeManager.onCausesAdd(causalFact, [newWeight.causeId]);
+            this.causesChangeManager.onCausesAdd(nodeData, [newWeight.causeId]);
 
         this._dispatchMutated();
     }
 
-    #removeWeightEdge(causalFact, weightEdge) {
-        const weights = this.#getWeights(causalFact);
+    #removeWeightEdge(nodeData, weightEdge) {
+        const causalFact = nodeData.fact;
+
+        const weights = this.#getWeights(nodeData);
         const removeIndex = weights.indexOf(weightEdge);
         if (removeIndex != -1) {
             const edgeToRemove = weights[removeIndex];
             weights.splice(removeIndex, 1);
             if (edgeToRemove.causeId) {
-                this.causesChangeManager.onCausesRemoved(causalFact, [
+                this.causesChangeManager.onCausesRemoved(nodeData, [
                     edgeToRemove.causeId,
                 ]);
             } else {
@@ -94,39 +93,40 @@ export class FactDataProvider extends NodeDataProvider {
     }
 
     removeEdge(weightEdge) {
-        const causalFact = this.#causalFact;
+        const nodeData = this._data;
         CommandUtils.executeUndoRedoActionCommand(
             this.undoRedoManager,
-            this.#removeWeightEdge.bind(this, causalFact),
-            this.#addWeightEdge.bind(this, causalFact),
+            this.#removeWeightEdge.bind(this, nodeData),
+            this.#addWeightEdge.bind(this, nodeData),
             weightEdge
         );
     }
 
     changeAbstractFactId(newAbstrId) {
-        const oldAbstrId = this.#causalFact.abstractFactId;
-        const causalFact = this.#causalFact;
+        const causalFact = this.getFact();
+        const oldAbstrId = causalFact.abstractFactId;
+        const nodeData = this._data;
 
         let cmdToExecute = new Command(
             () => {
-                this.#changeAbstractFactId(causalFact, newAbstrId);
+                this.#changeAbstractFactId(nodeData, newAbstrId);
             },
             () => {
-                this.#changeAbstractFactId(causalFact, oldAbstrId);
+                this.#changeAbstractFactId(nodeData, oldAbstrId);
             }
         );
 
-        if (!this.#getWeights(causalFact)?.length && newAbstrId) {
+        if (!this.#getWeights(nodeData)?.length && newAbstrId) {
             const defaultWeightEdge = this.#createDefaultWeightEdge(newAbstrId);
             const addRemoveEdgeCmd = new Command(
                 () => {
                     // Add first weight edge
-                    this.#addWeightEdge(causalFact, defaultWeightEdge);
+                    this.#addWeightEdge(nodeData, defaultWeightEdge);
                 },
                 () => {
                     // If there was the first weight edge added automatically,
                     // remove it also automatically
-                    this.#removeWeightEdge(causalFact, defaultWeightEdge);
+                    this.#removeWeightEdge(nodeData, defaultWeightEdge);
                 }
             );
             cmdToExecute = MacroCommand.fromCommands(cmdToExecute, addRemoveEdgeCmd);
@@ -135,11 +135,13 @@ export class FactDataProvider extends NodeDataProvider {
         this.undoRedoManager.execute(cmdToExecute);
     }
 
-    #changeAbstractFactId(causalFact, newId) {
+    #changeAbstractFactId(nodeData, newId) {
+        const causalFact = nodeData.fact;
+
         const oldAbstrId = causalFact.abstractFactId;
         causalFact.abstractFactId = newId;
 
-        this.causesChangeManager.onCauseIdChanged(causalFact, oldAbstrId, newId);
+        this.causesChangeManager.onCauseIdChanged(nodeData, oldAbstrId, newId);
 
         this._dispatchMutated();
     }
@@ -172,13 +174,13 @@ export class FactDataProvider extends NodeDataProvider {
 
     // Todo: test with undo and non-clear redo stack selection
     changeWeightEdgeCauseId(weightEdge, newCauseId) {
-        const causalFact = this.#causalFact;
+        const nodeData = this._data;
         const setWeightEdge = (newCauseId) => {
             // const actualWeightEdge = this.#getActualWeightEdge(weightEdge);
             const oldCauseId = weightEdge.causeId;
             weightEdge.causeId = newCauseId;
             this.causesChangeManager.onCauseIdChanged(
-                causalFact,
+                nodeData,
                 oldCauseId,
                 newCauseId
             );

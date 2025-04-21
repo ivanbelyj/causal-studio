@@ -1,6 +1,7 @@
 import { CausesItem } from "./causes-item.js";
 import { CausesExpressionProvider } from "../providers/causes-expression-provider.js";
-import { BaseCausesComponent } from "../base-causes-component.js";
+import { BaseCausesComponent } from "./base-causes-component.js";
+
 
 export class CausesComponent extends BaseCausesComponent {
   shouldHandleReset(nodeData) {
@@ -8,9 +9,7 @@ export class CausesComponent extends BaseCausesComponent {
   }
 
   render(nodeData) {
-    const fact = nodeData.fact;
-
-    const rootCausesExpr = fact.causesExpression;
+    const rootCausesExpr = nodeData.fact.causesExpression;
     const rootCausesItem = new CausesItem({
       selector: this.content.node(),
       isRemovable: false,
@@ -20,7 +19,7 @@ export class CausesComponent extends BaseCausesComponent {
       causesExpressionProvider: new CausesExpressionProvider(
         this.undoRedoManager,
         this.causesChangeManager,
-        fact
+        nodeData
       ),
     });
     rootCausesItem.resetProvider(rootCausesExpr);

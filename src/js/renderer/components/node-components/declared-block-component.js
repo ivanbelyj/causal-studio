@@ -1,5 +1,5 @@
 import { BaseNodeComponent } from "./base-node-component"
-import { DeclaredBlockDataProvider } from "./providers/declared-block-data-provider";
+import { DeclaredBlockDataProvider } from "../providers/declared-block-data-provider";
 
 export class DeclaredBlockComponent extends BaseNodeComponent {
     constructor(selector, causalView, api, undoRedoManager, blockConventionsProvider) {
@@ -24,6 +24,14 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
     }
 
     #renderBlockNode() {
+        this.titleInput = this.appendTextInputItem({
+            name: "Title",
+            propName: "title",
+            inputId: "node-title-input",
+            dontShowLabel: true,
+            isInnerProp: false,
+        });
+
         this.appendTextInputItem({
             name: "Declared Block Id",
             inputId: "block-id-input",

@@ -69,17 +69,10 @@ export class CausalViewManager {
   onCausalModelSelected({ causalModelName }) {
     const selectedCausalModel =
       this.dataManager.projectData.getCausalModel(causalModelName);
-    const causalViewData =
-      CausalViewManager.#toCausalViewData(selectedCausalModel);
+    const causalViewData = CausalViewDataUtils.factsAndNodesDataToCausalViewData(selectedCausalModel);
+    this.causalViewDataManager.causalModelName = causalModelName;
 
     this.reset(causalViewData);
-  }
-
-  static #toCausalViewData(causalModel) {
-    return CausalViewDataUtils.factsAndNodesDataToCausalViewData(
-      causalModel.facts,
-      causalModel.nodesData
-    );
   }
 
   onDeclareBlockClicked({

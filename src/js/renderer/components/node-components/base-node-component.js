@@ -101,7 +101,7 @@ export class BaseNodeComponent {
                 input.attr("type", "text");
             }
             return input;
-        }, args)
+        }, args);
     }
 
     // Returns input containing in input-item

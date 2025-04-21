@@ -1,5 +1,5 @@
-import { BlockCausesComponent } from "../../components/block-causes-component.js";
-import { CausesComponent } from "../../components/causes-component/causes-component.js";
+import { CausesComponent } from "../../components/causes-components/causes-component.js";
+import { BlockCausesComponent } from "../../components/causes-components/block-causes-component.js";
 
 export function createCausesComponent(container) {
   const causesComponent = new CausesComponent(

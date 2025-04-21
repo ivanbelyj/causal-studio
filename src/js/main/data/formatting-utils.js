@@ -13,7 +13,7 @@ export class FormattingUtils {
 
   static #moveUpTypeProperty(obj) {
     console.log("move up type property", obj);
-    if (typeof obj === "object" && obj.hasOwnProperty("$type")) {
+    if (obj && typeof obj === "object" && !Array.isArray(obj) && obj.hasOwnProperty("$type")) {
       const { $type, ...objWithoutType } = obj;
 
       for (const prop in obj) {

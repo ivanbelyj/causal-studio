@@ -49,14 +49,30 @@ export class CausalModelUtils {
     return [...idsSet];
   }
 
-  static getCausesIdsUnique(causalModelFact) {
+  static getCausesIdsUnique(nodeData) {
+    let idsAll;
+    if (nodeData.fact) {
+      idsAll = CausalModelUtils.#getCauseIdsForFact(nodeData.fact);
+    }
+    if (nodeData.block) {
+      idsAll = CausalModelUtils.#getCauseIdsForBlock(nodeData.block);
+    }
+
+    return [...new Set(idsAll)];
+  }
+
+  static #getCauseIdsForFact(causalModelFact) {
     const idsAll = [
       ...CausalModelUtils.findCauseIds(causalModelFact.causesExpression),
       ...CausalModelUtils.getWeightsEdgesIds(causalModelFact),
     ];
     if (causalModelFact.abstractFactId)
       idsAll.push(causalModelFact.abstractFactId);
-    return [...new Set(idsAll)];
+    return idsAll;
+  }
+
+  static #getCauseIdsForBlock(declaredBlock) {
+    return Object.values(declaredBlock.blockCausesMap);
   }
 
   // Edges are identified by source and target ids
@@ -103,6 +119,7 @@ export class CausalModelUtils {
   }
 
   static factComplement(minuendFact, subtrahendFact) {
+    // TODO: use node data, not fact
     const minCausesIds = CausalModelUtils.getCausesIdsUnique(minuendFact);
     const subCausesIds = CausalModelUtils.getCausesIdsUnique(subtrahendFact);
     return CausalModelUtils.arrayComplement(minCausesIds, subCausesIds);

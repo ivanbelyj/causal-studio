@@ -1,5 +1,5 @@
 import { BaseNodeComponent } from "./base-node-component"
-import { FactDataProvider } from "./providers/fact-data-provider";
+import { FactDataProvider } from "../providers/fact-data-provider";
 
 export class NodeValueComponent extends BaseNodeComponent {
   renderNode(nodeData) {

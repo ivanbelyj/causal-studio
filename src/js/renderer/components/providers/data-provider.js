@@ -1,10 +1,12 @@
+import { ChangePropertyCommand } from "../../undo-redo/commands/change-property-command";
+import { Command } from "../../undo-redo/commands/command";
+
 // Todo: rename
 export class DataProvider extends EventTarget {
   #data;
-  constructor(undoRedoManager, causesChangeManager) {
+  constructor(undoRedoManager) {
     super();
     this.undoRedoManager = undoRedoManager;
-    this.causesChangeManager = causesChangeManager;
   }
   get _data() {
     return this.#data;
@@ -42,4 +44,40 @@ export class DataProvider extends EventTarget {
     event.newValue = newValue;
     this.dispatchEvent(event);
   }
+
+  changeProperty(
+    propertyName,
+    isInnerProp,
+    propertyValue
+  ) {
+    // this.getInnerToMutate() result can change after selecting another node
+    const objToMutate = isInnerProp ? this.getInnerToMutate() : this._data;
+    const oldValue = objToMutate[propertyName];
+    this.undoRedoManager.execute(
+      new ChangePropertyCommand(
+        (newVal) => {
+          objToMutate[propertyName] = newVal;
+          this._dispatchPropertyChanged(propertyName, propertyValue);
+        },
+        propertyValue,
+        oldValue,
+        propertyName
+      )
+    );
+  }
+
+  // changeProperty(propertyName, propertyValue) {
+  //   const oldValue = this._data[propertyName];
+  //   const cmd = new Command(
+  //     () => {
+  //       this._data[propertyName] = propertyValue;
+  //       this._dispatchPropertyChanged(propertyName, propertyValue);
+  //     },
+  //     () => {
+  //       this._data[propertyName] = oldValue;
+  //       this._dispatchPropertyChanged(propertyName, oldValue);
+  //     }
+  //   );
+  //   this.undoRedoManager.execute(cmd);
+  // }
 }

@@ -3,7 +3,8 @@ import { ChangePropertyCommand } from "../../undo-redo/commands/change-property-
 
 export class NodeDataProvider extends DataProvider {
     constructor(undoRedoManager, causesChangeManager) {
-        super(undoRedoManager, causesChangeManager);
+        super(undoRedoManager);
+        this.causesChangeManager = causesChangeManager;
     }
 
     getInner() {

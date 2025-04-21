@@ -16,8 +16,8 @@ export class GraphManager {
       .graphStratify()
       .id((nodeData) => CausalViewNodeUtils.getNodeId(nodeData))
       .parentIds(
-        function ({ fact }) {
-          return CausalModelUtils.getCausesIdsUnique(fact);
+        function (nodeData) {
+          return CausalModelUtils.getCausesIdsUnique(nodeData);
         }.bind(this)
       );
   }
@@ -59,7 +59,10 @@ export class GraphManager {
   }
 
   removeLink(sourceId, targetId) {
-    this.getLinkBySourceAndTargetIds(sourceId, targetId).delete();
+    const link = this.getLinkBySourceAndTargetIds(sourceId, targetId);
+    if (link) {
+      link.delete();
+    }
   }
 
   getNodes() {

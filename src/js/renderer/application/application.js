@@ -1,4 +1,5 @@
-import { DataManager } from "../data/data-manager";
+import { CausalBundleDataManager } from "../data/causal-bundle-data-manager";
+import { UndoRedoManager } from "../undo-redo/undo-redo-manager";
 import { AppContextMenuManager } from "./app-context-menu-manager";
 import { AppEventManager } from "./app-event-manager";
 import { AppLayoutManager } from "./app-layout-manager";
@@ -14,10 +15,12 @@ export class Application {
         const contextMenuManager = new AppContextMenuManager();
         contextMenuManager.init();
 
-        const dataManager = new DataManager({ api: window.api });
+        const causalBundleDataManager = new CausalBundleDataManager({ api: window.api });
+
+        const undoRedoManager = new UndoRedoManager(window.api);
 
         const layoutManager = new AppLayoutManager();
-        layoutManager.init(dataManager);
+        layoutManager.init(causalBundleDataManager, undoRedoManager);
 
         const themeManager = new AppThemeManager();
         themeManager.init();

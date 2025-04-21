@@ -5,11 +5,18 @@ import "../../../css/elements/dialog.css";
 export class Dialog {
   constructor(
     modalId,
-    { title, mainContent, continueButtonContent, closeButtonContent }
+    {
+      title,
+      mainContent,
+      continueButtonContent,
+      closeButtonContent,
+      focusOnContinue = false
+    }
   ) {
     this.modalId = modalId;
     this.mainContent = mainContent;
     this.continueButtonId = `${modalId}-continue-button-id`;
+    this.focusOnContinue = focusOnContinue;
     this.modalContentTemplate = `
         <div class="modal__overlay" tabindex="-1" data-micromodal-close>
             <div class="component modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
@@ -25,9 +32,8 @@ export class Dialog {
                 <footer class="modal__footer">
                   <button
                     id="${this.continueButtonId}"
-                    class="button modal__btn modal__btn-primary">${
-                      continueButtonContent ?? "Continue"
-                    }</button>
+                    class="button modal__btn modal__btn-primary">${continueButtonContent ?? "Continue"
+      }</button>
                   <button class="button modal__btn" data-micromodal-close aria-label="Close this dialog window">
                     ${closeButtonContent ?? "Close"}
                   </button>
@@ -55,6 +61,10 @@ export class Dialog {
     MicroModal.show(this.modalId, {
       awaitCloseAnimation: true,
     });
+
+    if (this.focusOnContinue) {
+      this.#focusContinueButton();
+    }
   }
 
   close() {
@@ -63,5 +73,12 @@ export class Dialog {
 
   #getDialogElementContent() {
     return `${this.modalId}-content`;
+  }
+
+  #focusContinueButton() {
+    const continueButton = d3.select(`#${this.continueButtonId}`).node();
+    if (continueButton) {
+      continueButton.focus();
+    }
   }
 }

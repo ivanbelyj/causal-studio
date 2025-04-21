@@ -8,10 +8,10 @@ export class CausalViewNodeUtils {
   static getNodeDisplayingText(nodeData) {
     return CausalViewNodeUtils.truncateTextWithEllipsis(
       nodeData.title ||
-        nodeData.fact?.factValue ||
-        nodeData.fact?.id ||
-        nodeData.block?.id ||
-        nodeData.block.convention
+      nodeData.fact?.factValue ||
+      nodeData.fact?.id ||
+      nodeData.block?.id ||
+      nodeData.block.convention
     );
   }
 

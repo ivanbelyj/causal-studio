@@ -1,6 +1,6 @@
 import { BaseCausesComponent } from "./base-causes-component";
-import { SelectNodeElement } from "../elements/select-node-element";
-import { DeclaredBlockDataProvider } from "./providers/declared-block-data-provider";
+import { SelectNodeElement } from "../../elements/select-node-element";
+import { DeclaredBlockDataProvider } from "../providers/declared-block-data-provider";
 
 export class BlockCausesComponent extends BaseCausesComponent {
     constructor(
@@ -28,7 +28,6 @@ export class BlockCausesComponent extends BaseCausesComponent {
         const blockCauses = this.#getBlockCauseNames("TestCausesConvention");
 
         for (const blockCauseName of blockCauses) {
-            console.log("Render block cause", blockCauseName, "block", nodeData.block);
             this.#addSelectNodeItem(
                 this.content,
                 blockCauseName,

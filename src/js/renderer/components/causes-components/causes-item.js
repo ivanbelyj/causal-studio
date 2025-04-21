@@ -118,12 +118,12 @@ export class CausesItem {
       this.causesExpressionProvider.get()?.$type ?? noneOptionVal
     );
 
-    const causalFact = this.causesExpressionProvider.causalFact;
+    const nodeData = this.causesExpressionProvider.nodeData;
     typeDropdown.on(
       "change",
       function (e) {
         this.causesExpressionProvider.changeExpressionType(
-          causalFact,
+          nodeData,
           e.target.value
         );
       }.bind(this)
@@ -188,7 +188,7 @@ export class CausesItem {
       this.causalView,
       (newCauseId) => {
         this.causesExpressionProvider.changeCauseId(
-          this.causesExpressionProvider.causalFact,
+          this.causesExpressionProvider.nodeData,
           newCauseId
         );
       }

@@ -1,5 +1,6 @@
-import { DeclaredBlockComponent } from "../../components/declared-block-component.js";
-import { NodeValueComponent } from "../../components/node-value-component.js";
+import { DeclaredBlockComponent } from "../../components/node-components/declared-block-component";
+import { NodeValueComponent } from "../../components/node-components/node-value-component";
+
 export function createNodeComponent(container) {
   const nodeValueComponent = new NodeValueComponent(
     container.element,

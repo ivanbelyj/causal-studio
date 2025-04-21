@@ -120,3 +120,48 @@ body,
 .select-node-element__input {
   margin-right: 0.75em;
 }
+
+body .lm_title {
+  color: var(--color);
+}
+
+/* ===== Js-Tree context menu style fixes ===== */
+
+/* Very bad hack with increasing the specificity of the selector...
+But it just works for now */
+
+body .jstree-default-dark .jstree-anchor {
+  color: var(--color);
+}
+
+body .jstree-contextmenu {
+  box-shadow: none;
+  padding: 0;
+  background-color: var(--background-color);
+}
+
+body .jstree-contextmenu li > a {
+  color: var(--color);
+  text-shadow: none;
+}
+
+body .vakata-context li > a .vakata-contextmenu-sep {
+  background: none;
+}
+
+body .vakata-context li > a,
+body .vakata-context .vakata-context-hover > a {
+  background: var(--pale-background);
+  box-shadow: none;
+  border: 1px solid #949494;
+  font-size: 0.75rem;
+}
+
+body .vakata-context li > a:hover
+{
+  background: var(--pale-background);
+  box-shadow: none;
+  filter: var(--filter_hover);
+}
+
+/* ===== End Js-Tree style fixes ===== */

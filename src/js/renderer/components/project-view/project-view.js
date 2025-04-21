@@ -3,26 +3,32 @@ import "../../../../third-party/jstree/themes/default/style.css";
 import "../../../../third-party/jstree/themes/default-dark/style.css";
 import "jstree";
 import { JsTreeDataUtils } from "./js-tree-data-utils";
-import { CausalModelProjectViewNodeHandler } from "./causal-model-project-view-node-handler";
+import { EventSendingProjectViewNodeHandler } from "./event-sending-project-view-node-handler";
 import ProjectViewContextMenuManager from "./project-view-context-menu-manager";
 
 const projectViewId = "#project-view";
 
 export class ProjectView {
-  constructor(selector) {
+  constructor(selector, dataManager) {
     this.component = d3.select(selector);
+    this.dataManager = dataManager;
   }
 
   init() {
     this.#initJsTree();
-    this.nodeHandlers = [new CausalModelProjectViewNodeHandler()];
-    this.contextMenuManager = new ProjectViewContextMenuManager();
-    this.contextMenuManager.init(projectViewId);
+    this.nodeHandlers = [new EventSendingProjectViewNodeHandler()];
+
+    this.contextMenuManager = new ProjectViewContextMenuManager(
+      this.dataManager,
+      () => {
+        this.setProjectData(this.dataManager.projectData);
+      });
   }
 
   setProjectData(projectData) {
     const jsTreeData = JsTreeDataUtils.projectDataToJsTreeData(projectData);
-    this.#reset(jsTreeData);
+    console.log("js tree data", jsTreeData);
+    this.reset(jsTreeData);
   }
 
   onJsTreeChanged(e, data) {
@@ -37,11 +43,20 @@ export class ProjectView {
     console.log("Selected: " + selectedNodesText.join(", "));
   }
 
+  reset(treeData) {
+    let instance = $(projectViewId).jstree(true);
+    this.jsTreeInstance = instance;
+
+    // set new data
+    instance.settings.core.data = treeData;
+
+    //important to refresh the tree, must set the second parameter to true
+    instance.refresh(false, true);
+  }
+
   #handleNodeSelect(data, node) {
     for (const nodeHandler of this.nodeHandlers) {
-      if (nodeHandler.shouldHandleSelect(data.instance, node)) {
-        nodeHandler.handleSelected(node.id);
-      }
+      nodeHandler.handleSelected(data.instance, node);
     }
   }
 
@@ -55,6 +70,7 @@ export class ProjectView {
       $(projectViewId).on("changed.jstree", onJsTreeChanged);
 
       $(projectViewId).jstree({
+        plugins: ["contextmenu"],
         core: {
           data: [],
           animation: 0,
@@ -63,15 +79,11 @@ export class ProjectView {
             icons: false,
           },
         },
+        contextmenu: {
+          items: (node) => this.contextMenuManager.getContextMenuItems(node),
+          // items: this.contextMenuManager.getContextMenuItems.bind(this.contextMenuManager),
+        },
       });
     });
-  }
-
-  #reset(treeData) {
-    let instance = $(projectViewId).jstree(true);
-    // set new data
-    instance.settings.core.data = treeData;
-    //important to refresh the tree, must set the second parameter to true
-    instance.refresh(false, true);
   }
 }

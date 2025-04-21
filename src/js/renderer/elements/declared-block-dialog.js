@@ -7,6 +7,7 @@ export class DeclaredBlockDialog extends Dialog {
       title: "Declare Block",
       closeButtonContent: "Cancel",
       continueButtonContent: "Declare Block",
+      focusOnContinue: true,
       mainContent: d3.create("div").html(`
           <div class="input-item">
             <label class="input-item__label">Declared Block Id</label>

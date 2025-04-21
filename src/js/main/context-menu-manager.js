@@ -31,7 +31,7 @@ class ContextMenuManager {
       showCopyImage: false,
       prepend: (defaultActions, parameters, browserWindow) => [
         {
-          label: "Create Node",
+          label: "Create Fact",
           visible: this.isCausalViewEntered,
           click: (event) => {
             this.window.webContents.send("create-node", {
@@ -51,7 +51,7 @@ class ContextMenuManager {
           },
         },
         {
-          label: "Remove Node",
+          label: "Remove Fact",
           visible: this.isNodeEntered,
           click: () => {
             this.isNodeEntered = false; // entered node is removed

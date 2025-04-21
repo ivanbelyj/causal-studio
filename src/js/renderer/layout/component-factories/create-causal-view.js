@@ -4,7 +4,7 @@ import { UndoRedoManager } from "../../undo-redo/undo-redo-manager.js";
 import { CausalViewManager } from "../../causal-view/causal-view-manager.js";
 
 // Todo:
-class CausalViewFactory {}
+class CausalViewFactory { }
 
 export function createCausalView(container) {
   const unsubscribeFromEvents = () => {
@@ -41,8 +41,6 @@ export function createCausalView(container) {
 
   container.layoutManager.on("beforeItemDestroyed", beforeItemDestroyed);
   container.layoutManager.on("itemCreated", onItemCreated);
-
-  this.undoRedoManager = new UndoRedoManager(this.api);
 
   this.causalView = new CausalViewManager(
     container.element,

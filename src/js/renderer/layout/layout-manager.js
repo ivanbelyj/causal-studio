@@ -1,6 +1,7 @@
 import { GoldenLayout } from "golden-layout";
 import * as d3 from "d3";
 
+import { createInspectorComponent } from "./component-factories/create-inspector-component.js";
 import { createCausalView } from "./component-factories/create-causal-view.js";
 import { createCausesComponent } from "./component-factories/create-causes-component.js";
 import { createWeightsComponent } from "./component-factories/create-weights-component.js";
@@ -15,10 +16,11 @@ const defaultComponentTypesAndFactories = {
   Causes: createCausesComponent,
   Weights: createWeightsComponent,
   "Project View": createProjectView,
+  Inspector: createInspectorComponent,
 };
 
 export class LayoutManager {
-  constructor(layoutSelector, api, dataManager) {
+  constructor(layoutSelector, api, dataManager, undoRedoManager) {
     this.layoutContainer = d3
       .select(layoutSelector)
       .attr("class", "layout-container");
@@ -27,6 +29,8 @@ export class LayoutManager {
     this.componentTypesAndItems = new Map();
 
     this.dataManager = dataManager;
+
+    this.undoRedoManager = undoRedoManager;
   }
 
   initLayout(config) {

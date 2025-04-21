@@ -3,7 +3,8 @@ import { NodeDataProvider } from "./node-data-provider";
 
 export class DeclaredBlockDataProvider extends NodeDataProvider {
     constructor(undoRedoManager, causesChangeManager) {
-        super(undoRedoManager, causesChangeManager);
+        super(undoRedoManager);
+        this.causesChangeManager = causesChangeManager;
     }
 
     get #declaredBlock() {
@@ -28,7 +29,7 @@ export class DeclaredBlockDataProvider extends NodeDataProvider {
             const oldCauseId = declaredBlock.blockCausesMap[causeName];
             declaredBlock.blockCausesMap[causeName] = newCauseId;
             this.causesChangeManager.onCauseIdChanged(
-                declaredBlock,
+                this._data,
                 oldCauseId,
                 newCauseId
             );

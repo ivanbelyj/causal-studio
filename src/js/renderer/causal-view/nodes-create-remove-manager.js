@@ -55,13 +55,10 @@ export class NodesCreateRemoveManager {
   createNodeWithNodeData(nodeData) {
     this.causalView.addNodeWithData(nodeData);
 
-    // TODO: blocks support
-    if (nodeData.fact) {
-      this.causesChangeManager.onCausesAdd(
-        nodeData,
-        CausalModelUtils.getCausesIdsUnique(nodeData.fact)
-      );
-    }
+    this.causesChangeManager.onCausesAdd(
+      nodeData,
+      CausalModelUtils.getCausesIdsUnique(nodeData)
+    );
 
     this.causalView.render();
 

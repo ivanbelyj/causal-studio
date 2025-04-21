@@ -1,4 +1,5 @@
 import { CausalModelUtils } from "../../causal-view/causal-model-utils";
+import { CausalViewNodeUtils } from "../../causal-view/render/causal-view-node-utils";
 import { Command } from "../../undo-redo/commands/command";
 import { DataProvider } from "./data-provider";
 
@@ -8,9 +9,10 @@ import { DataProvider } from "./data-provider";
  * (via CausesChangeManager) and undo / redo support
  */
 export class CausesExpressionProvider extends DataProvider {
-  constructor(undoRedoManager, causesChangeManager, causalFact) {
-    super(undoRedoManager, causesChangeManager);
-    this.causalFact = causalFact;
+  constructor(undoRedoManager, causesChangeManager, nodeData) {
+    super(undoRedoManager);
+    this.causesChangeManager = causesChangeManager;
+    this.nodeData = nodeData;
   }
 
   // Todo: fix bug
@@ -38,7 +40,7 @@ export class CausesExpressionProvider extends DataProvider {
       const newProvider = new CausesExpressionProvider(
         this.undoRedoManager,
         this.causesChangeManager,
-        this.causalFact
+        this.nodeData
       );
       newProvider.set(expr);
       return newProvider;
@@ -46,7 +48,7 @@ export class CausesExpressionProvider extends DataProvider {
     return res;
   }
 
-  changeExpressionType(causalFact, newType) {
+  changeExpressionType(nodeData, newType) {
     const prevCausesExpr = structuredClone(this._causesExpression);
     const changedCausesExpr = this.getChangedTypeCausesExpression(
       this._causesExpression,
@@ -54,8 +56,8 @@ export class CausesExpressionProvider extends DataProvider {
     );
 
     const cmd = new Command(
-      this.mutateCausesExpression.bind(this, causalFact, changedCausesExpr),
-      this.mutateCausesExpression.bind(this, causalFact, prevCausesExpr)
+      this.mutateCausesExpression.bind(this, nodeData, changedCausesExpr),
+      this.mutateCausesExpression.bind(this, nodeData, prevCausesExpr)
     );
     this.undoRedoManager.execute(cmd);
     // this.#dispatchMutated();
@@ -90,12 +92,12 @@ export class CausesExpressionProvider extends DataProvider {
     return res;
   }
 
-  mutateCausesExpression(causalFact, newExpr) {
+  mutateCausesExpression(nodeData, newExpr) {
     const removedExprClone = structuredClone(this._causesExpression);
 
     // Tracked to update causal view
     this.causesChangeManager.onCausesExpressionAdd(
-      causalFact,
+      nodeData,
       newExpr
       // CausalModelUtils.causesExpressionComplement(newExpr, removedExprClone)
     );
@@ -108,7 +110,7 @@ export class CausesExpressionProvider extends DataProvider {
 
     // Tracked to update causal view
     this.causesChangeManager.onCausesExpressionRemoved(
-      causalFact,
+      nodeData,
       removedExprClone
       // CausalModelUtils.causesExpressionComplement(
       //   removedExprClone,
@@ -134,14 +136,14 @@ export class CausesExpressionProvider extends DataProvider {
     this.undoRedoManager.execute(changeProbCmd);
   }
 
-  changeCauseId(causalFact, newCauseId) {
+  changeCauseId(nodeData, newCauseId) {
     const expr = this._causesExpression;
     const setCauseId = function (causeId) {
       const oldId = expr.edge.causeId;
       expr.edge.causeId = causeId;
 
       this.causesChangeManager.onCauseIdChanged(
-        causalFact,
+        nodeData,
         oldId,
         expr.edge.causeId
       );
@@ -158,13 +160,13 @@ export class CausesExpressionProvider extends DataProvider {
   addNewOperand() {
     const newExpr = CausalModelUtils.createFactorExpression();
     const baseExpr = this._causesExpression;
-    const causalFact = this.causalFact;
+    const nodeData = this.nodeData;
     const cmd = new Command(
       function () {
-        this.#addOperand(causalFact, baseExpr, newExpr);
+        this.#addOperand(nodeData, baseExpr, newExpr);
       }.bind(this),
       function () {
-        this.#removeOperand(causalFact, baseExpr, newExpr);
+        this.#removeOperand(nodeData, baseExpr, newExpr);
       }.bind(this)
     );
     this.undoRedoManager.execute(cmd);
@@ -172,19 +174,19 @@ export class CausesExpressionProvider extends DataProvider {
 
   removeOperand(expr) {
     const baseExpr = this._causesExpression;
-    const causalFact = this.causalFact;
+    const nodeData = this.nodeData;
     const cmd = new Command(
       function () {
-        this.#removeOperand(causalFact, baseExpr, expr);
+        this.#removeOperand(nodeData, baseExpr, expr);
       }.bind(this),
       function () {
-        this.#addOperand(causalFact, baseExpr, expr);
+        this.#addOperand(nodeData, baseExpr, expr);
       }.bind(this)
     );
     this.undoRedoManager.execute(cmd);
   }
 
-  #addOperand(causalFact, baseExpr, newExpr) {
+  #addOperand(nodeData, baseExpr, newExpr) {
     if (!newExpr) console.error("add empty operand", newExpr);
     baseExpr.operands.push(newExpr);
     // New operand has no cause so cause change will be handled on change type
@@ -192,22 +194,22 @@ export class CausesExpressionProvider extends DataProvider {
     const newExprProvider = new CausesExpressionProvider(
       this.undoRedoManager,
       this.causesChangeManager,
-      causalFact
+      nodeData
     );
 
-    this.causesChangeManager.onCausesExpressionAdd(causalFact, newExpr);
+    this.causesChangeManager.onCausesExpressionAdd(nodeData, newExpr);
 
     // onNewOperandAdded?.(newExprProvider);
     newExprProvider.set(newExpr);
     this._dispatchMutated();
   }
 
-  #removeOperand(causalFact, baseExpr, operandExpr) {
+  #removeOperand(nodeData, baseExpr, operandExpr) {
     const removeIndex = baseExpr.operands.indexOf(operandExpr);
     baseExpr.operands.splice(removeIndex, 1);
 
     // Pass removed causes to update causal-view
-    this.causesChangeManager.onCausesExpressionRemoved(causalFact, operandExpr);
+    this.causesChangeManager.onCausesExpressionRemoved(nodeData, operandExpr);
     this._dispatchMutated();
   }
 }
