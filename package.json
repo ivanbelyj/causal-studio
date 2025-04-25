@@ -1,7 +1,7 @@
 {
-  "name": "causal-editor",
+  "name": "causal-studio",
   "version": "0.1.0",
-  "description": "causal editor test",
+  "description": "Desktop visual editor of causal models",
   "main": "./.webpack/main",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/ivanbelyj/causal-editor.git"
+    "url": "git+ssh://git@github.com/ivanbelyj/causal-studio.git"
   },
   "author": "Ivan Belyj",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ivanbelyj/causal-editor/issues"
+    "url": "https://github.com/ivanbelyj/causal-studio/issues"
   },
-  "homepage": "https://github.com/ivanbelyj/causal-editor#readme",
+  "homepage": "https://github.com/ivanbelyj/causal-studio#readme",
   "devDependencies": {
     "@babel/core": "^7.22.17",
     "@babel/preset-env": "^7.22.15",

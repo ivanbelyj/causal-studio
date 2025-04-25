@@ -1,7 +1,7 @@
 import UpgradeToV1Utils from "./upgrade-to-v1-utils";
 
 /**
- * Upgrades causal-editor data from v0 to v1
+ * Upgrades causal-studio data from v0 to v1
  */
 export class UpgradeToV1 {
   upgradeProjectData(projectData) {

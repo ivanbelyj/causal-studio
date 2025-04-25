@@ -5,8 +5,7 @@ module.exports = {
    */
   entry: "./src/js/main/main.js",
   devtool: "source-map",
-  // Put your normal webpack config below here
   module: {
     rules: require("./webpack.rules"),
-  },
+  }
 };

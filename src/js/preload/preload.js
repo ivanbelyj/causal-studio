@@ -37,6 +37,9 @@ contextBridge.exposeInMainWorld("api", {
 
   // Called to handle saving in undo-redo-manager
   onSavedToCurrentFile: (func) => on("on-saved-to-current-file", func),
+
+  onFixationCompleted: (func) => on("fixation-completed", func),
+  onProbabilityEstimationCompleted: (func) => on("probability-estimation-completed", func)
 });
 
 function invoke(channelName, data) {

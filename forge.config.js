@@ -2,6 +2,7 @@ module.exports = {
   packagerConfig: {
     asar: false,
     icon: "./src/images/causal-studio-icon",
+    extraResource: ["./resources/cli"]
   },
   rebuildConfig: {},
   makers: [

@@ -1,9 +1,12 @@
-const { nativeTheme, shell, ipcMain, Menu, dialog } = require("electron");
+import { CausalRunHelper } from "../causal-cli-integration/causal-run-helper";
+
+const { nativeTheme, shell } = require("electron");
 
 export default class MenuActionHelper {
-  constructor(window, projectManager) {
+  constructor(window, projectManager, activeComponentTypes) {
     this.window = window;
     this.projectManager = projectManager;
+    this.causalRunHelper = new CausalRunHelper(window, activeComponentTypes);
   }
 
   sendMessage(messageName, data) {
@@ -50,8 +53,28 @@ export default class MenuActionHelper {
     this.projectManager.exportCausalModelFacts();
   }
 
+  runCausalBundle() {
+
+  }
+
+  runCausalBundleWithSpecifiedModel() {
+
+  }
+
+  runProbabilityEstimation() {
+
+  }
+
+  async runCausalBundleWithFilePicker() {
+    await this.causalRunHelper.runWithFilePicker("fixate");
+  }
+
+  async runProbabilityEstimationWithFilePicker() {
+    await this.causalRunHelper.runWithFilePicker("montecarlo");
+  }
+
   async openGitHub() {
-    await shell.openExternal("https://github.com/ivanbelyj/causal-editor");
+    await shell.openExternal("https://github.com/ivanbelyj/causal-studio");
   }
 
   async learnMore() {

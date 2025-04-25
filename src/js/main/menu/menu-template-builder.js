@@ -48,12 +48,12 @@ export default class MenuTemplateBuilder {
             click: async () => await menuActionHelper.openProject(),
           },
           {
-            label: "Save project",
+            label: "Save Project",
             accelerator: "CmdOrCtrl+S",
             click: async () => await menuActionHelper.saveProject(),
           },
           {
-            label: "Save project as...",
+            label: "Save Project As...",
             accelerator: "CmdOrCtrl+Shift+S",
             click: async () => await menuActionHelper.saveProjectAs(),
           },
@@ -163,6 +163,35 @@ export default class MenuTemplateBuilder {
         ],
       },
       {
+        label: "Model",
+        submenu: [
+          {
+            label: "Run",
+            accelerator: "CmdOrCtrl+R",
+            click: () => menuActionHelper.runCausalBundle(),
+          },
+          {
+            label: "Run Probability Estimation",
+            accelerator: "CmdOrCtrl+Shift+R",
+            click: () => menuActionHelper.runProbabilityEstimation(),
+          },
+          {
+            label: "Run Specified Model",
+            click: () => menuActionHelper.runProbabilityEstimation(),
+          },
+          {
+            label: "Run (File)",
+            accelerator: "CmdOrCtrl+Alt+R",
+            click: () => menuActionHelper.runCausalBundleWithFilePicker(),
+          },
+          {
+            label: "Run Probability Estimation (File)",
+            accelerator: "CmdOrCtrl+Alt+Shift+R",
+            click: () => menuActionHelper.runProbabilityEstimationWithFilePicker(),
+          },
+        ],
+      },
+      {
         label: "Theme",
         submenu: [
           {
@@ -186,12 +215,12 @@ export default class MenuTemplateBuilder {
         role: "help",
         submenu: [
           {
-            label: "See repository on GitHub",
-            click: () => menuActionHelper.openGitHub(),
+            label: "Learn More About Causal Models",
+            click: () => menuActionHelper.learnMore(),
           },
           {
-            label: "Learn more about causal models",
-            click: () => menuActionHelper.learnMore(),
+            label: "See Repository On GitHub",
+            click: () => menuActionHelper.openGitHub(),
           },
         ],
       },

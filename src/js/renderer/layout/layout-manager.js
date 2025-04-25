@@ -9,6 +9,8 @@ import { defaultLayoutConfig } from "./default-layout-config.js";
 import LayoutConfigUtils from "./layout-config-utils.js";
 import { createProjectView } from "./component-factories/create-project-view.js";
 import { createNodeComponent } from "./component-factories/create-node-component.js";
+import { createFixationResultsComponent } from "./component-factories/create-fixation-results-component.js";
+import { createProbabilityEstimationResultsComponent } from "./component-factories/create-probability-estimation-results-component.js";
 
 const defaultComponentTypesAndFactories = {
   "Causal View": createCausalView,
@@ -17,6 +19,8 @@ const defaultComponentTypesAndFactories = {
   Weights: createWeightsComponent,
   "Project View": createProjectView,
   Inspector: createInspectorComponent,
+  "Fixation Results": createFixationResultsComponent,
+  "Probability Estimation Results": createProbabilityEstimationResultsComponent
 };
 
 export class LayoutManager {

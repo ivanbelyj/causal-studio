@@ -5,7 +5,11 @@ import MenuTemplateBuilder from "./menu-template-builder.js";
 
 export class MenuManager {
   constructor(projectManager, window) {
-    this.menuActionHelper = new MenuActionHelper(window, projectManager);
+    this.activeComponentTypes = new Set();
+    this.menuActionHelper = new MenuActionHelper(
+      window,
+      projectManager,
+      this.activeComponentTypes);
 
     ipcMain.on("send-component-active", this.onSendComponentActive.bind(this));
 
@@ -32,9 +36,6 @@ export class MenuManager {
     }
     if (!this.registeredComponentTypes.has(componentType)) {
       this.registeredComponentTypes.add(componentType);
-    }
-    if (!this.activeComponentTypes) {
-      this.activeComponentTypes = new Set();
     }
     if (isActive) {
       this.activeComponentTypes.add(componentType);
