@@ -22,17 +22,26 @@ export class ProjectData {
 
     let {
       causalModels,
+      blockCausesConventions,
+      blockConventions,
+      blockResolvingMap,
       version,
       defaultMainModel
     } = args ?? {};
     causalModels ??= [this.createEmptyCausalModel()];
     defaultMainModel ??= causalModels.length > 0 ? causalModels[0].name : null;
+    blockCausesConventions ??= [];
+    blockConventions ??= [];
+    blockResolvingMap ??= {}
     version ??= DataValidator.getLatestVersion();
     return new ProjectData({
       ...args,
       causalModels,
+      blockCausesConventions,
+      blockConventions,
+      blockResolvingMap,
       version,
-      defaultMainModel
+      defaultMainModel,
     });
   }
 

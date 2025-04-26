@@ -57,28 +57,6 @@ export default class MenuTemplateBuilder {
             accelerator: "CmdOrCtrl+Shift+S",
             click: async () => await menuActionHelper.saveProjectAs(),
           },
-          {
-            label: "Import",
-            submenu: [
-              {
-                label: "Causal Model Facts",
-                accelerator: "CmdOrCtrl+I",
-                click: async () =>
-                  await menuActionHelper.importCausalModelFacts(),
-              },
-            ],
-          },
-          {
-            label: "Export",
-            submenu: [
-              {
-                label: "Causal Model Facts",
-                accelerator: "CmdOrCtrl+E",
-                click: async () =>
-                  await menuActionHelper.exportCausalModelFacts(),
-              },
-            ],
-          },
 
           isMac ? { role: "close" } : { role: "quit" },
         ],
@@ -167,18 +145,18 @@ export default class MenuTemplateBuilder {
         submenu: [
           {
             label: "Run",
-            accelerator: "CmdOrCtrl+R",
+            accelerator: "CmdOrCtrl+Space",
             click: () => menuActionHelper.runCausalBundle(),
           },
           {
             label: "Run Probability Estimation",
-            accelerator: "CmdOrCtrl+Shift+R",
+            accelerator: "CmdOrCtrl+Shift+Space",
             click: () => menuActionHelper.runProbabilityEstimation(),
           },
-          {
-            label: "Run Specified Model",
-            click: () => menuActionHelper.runProbabilityEstimation(),
-          },
+          // {
+          //   label: "Run Specified Model",
+          //   click: () => menuActionHelper.runCausalBundleWithSpecifiedModel(),
+          // },
           {
             label: "Run (File)",
             accelerator: "CmdOrCtrl+Alt+R",

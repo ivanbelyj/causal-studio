@@ -2,11 +2,20 @@ import { app, dialog } from "electron";
 import { CausalCLI } from "./causal-cli";
 const path = require('path');
 
+const eventBus = require("js-event-bus")();
+
 export class CausalRunHelper {
+    #causalBundle;
     constructor(window, activeComponentTypes) {
         this.causalCLI = new CausalCLI(this.getCLIPath());
         this.window = window;
         this.activeComponentTypes = activeComponentTypes;
+
+        eventBus.on("causalBundleOpened", this.onCausalBundleOpened.bind(this));
+    }
+
+    onCausalBundleOpened({ causalBundle }) {
+        this.#causalBundle = causalBundle;
     }
 
     getCLIPath() {
@@ -37,7 +46,34 @@ export class CausalRunHelper {
         );
     }
 
+    /**
+     * Serializes the object in JSON with escaping for the CLI
+     * @param {object} data - Object for serialization
+     * @returns {string} - A JSON string ready for transmission to the CLI
+     */
+    serializeForCLI(data) {
+        // 1. Standard serialization in compact JSON
+        const jsonString = JSON.stringify(data);
+
+        // 2. Additional escaping for Windows
+        if (process.platform === 'win32') {
+            return `"${jsonString.replace(/"/g, '\\"')}"`;
+        }
+
+        // 3. For Unix systems, we simply return it as it is.
+        return jsonString;
+    }
+
+    async runCurrentCausalBundle() {
+        return this.runCausalBundle(this.serializeForCLI(this.#causalBundle));
+    }
+
+    async runCurrentCausalBundleProbabilityEstimation() {
+        return this.runProbabilityEstimation(this.serializeForCLI(this.#causalBundle));
+    }
+
     async runCausalBundle(input) {
+        console.log("INPUT ", input);
         try {
             const result = await this.causalCLI.fixate({
                 input: input,

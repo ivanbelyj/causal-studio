@@ -11,7 +11,6 @@ export class WeightsComponent {
     this.causalView = causalView;
 
     this.causesChangeManager = causesChangeManager;
-    api.onProbabilityEstimationCompleted((event, data) => console.log(data));
 
     api.onReset(
       function (event, data) {

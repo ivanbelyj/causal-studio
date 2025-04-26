@@ -16,8 +16,26 @@ export class CausalCLI {
                 return;
             }
 
-            const cliProcess = spawn(this.cliPath, [command, ...args], {
-                // shell: true,
+            // Preparing command considering platform
+            let finalCommand = [command, ...args];
+            let shell = false;
+            let options = {
+                stdio: ['pipe', 'pipe', 'pipe'],
+                windowsVerbatimArguments: true
+            };
+
+            if (process.platform === 'win32') {
+                // Add chcp 65001 for Windows in the beginning of the command
+                finalCommand = ['cmd', '/c', 'chcp', '65001>nul', '&&', this.cliPath, ...finalCommand];
+                shell = true;
+            } else {
+                // For other platforms just run the command
+                finalCommand = [this.cliPath, ...finalCommand];
+            }
+
+            const cliProcess = spawn(finalCommand[0], finalCommand.slice(1), {
+                ...options,
+                shell: shell
             });
 
             let output = '';

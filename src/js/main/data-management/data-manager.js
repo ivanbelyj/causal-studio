@@ -4,6 +4,7 @@ import { UnsavedChangesHelper } from "./unsaved-changes-helper";
 import { AppTitleManager } from "./app-title-manager";
 import { DataProcessingHelper } from "./data-processing-helper";
 import { ProjectData } from "../data/project-data";
+import { DataStore } from "./data-store";
 
 const cmPrjFilter = {
   name: "Causal Model Project",
@@ -19,8 +20,14 @@ const projectFileFilters = [cmPrjFilter];
 const causalModelFactsFileFilters = [cmFactsFilter];
 
 export class DataManager {
-  constructor(window) {
+  /**
+   * 
+   * @param {*} window 
+   * @param {DataStore} dataStore 
+   */
+  constructor(window, dataStore) {
     this.window = window;
+    this.dataStore = dataStore;
 
     const appTitleManager = new AppTitleManager(window);
 
@@ -61,7 +68,7 @@ export class DataManager {
   async createNewProject() {
     await this.confirmUnsavedChanges(async () => {
       this.filesManager.currentFilePath = null;
-      this.#sendOpenData(this.projectDataHelper.createEmptyProjectData());
+      this.#handleOpenData(this.projectDataHelper.createEmptyProjectData());
     });
   }
 
@@ -83,27 +90,6 @@ export class DataManager {
     );
   }
 
-  // TODO: change
-  // async exportCausalModelFacts() {
-  //   this.filesManager.saveData(
-  //     "save",
-  //     causalModelFactsFileFilters,
-  //     "Export facts",
-  //     false,
-  //     // TODO:
-  //     (projectData) => projectData.facts
-  //   );
-  // }
-
-  #sendMessage(messageName, data) {
-    this.window.webContents.send(messageName, data);
-  }
-
-  #sendOpenData(projectData) {
-    this.#sendMessage("open-data", projectData);
-    this.#sendMessage("reset");
-  }
-
   async openProject() {
     await this.confirmUnsavedChanges(async () => {
       const projectData = await this.filesManager.openFileData(
@@ -112,27 +98,20 @@ export class DataManager {
         "Open project"
       );
       if (projectData) {
-        this.#sendOpenData(
+        this.#handleOpenData(
           await this.projectDataHelper.processOpenedProjectData(projectData)
         );
       }
     });
   }
 
-  // TODO: change
-  // async importCausalModelFacts() {
-  //   await this.confirmUnsavedChanges(async () => {
-  //     const openedData = await this.filesManager.openFileData(
-  //       causalModelFactsFileFilters,
-  //       false,
-  //       "Import facts"
-  //     );
+  #sendMessage(messageName, data) {
+    this.window.webContents.send(messageName, data);
+  }
 
-  //     if (openedData) {
-  //       const projectData =
-  //         this.projectDataHelper.processImportedFacts(openedData);
-  //       this.#sendOpenData(projectData);
-  //     }
-  //   });
-  // }
+  #handleOpenData(projectData) {
+    this.#sendMessage("open-data", projectData);
+    this.#sendMessage("reset");
+    this.dataStore.causalBundle = projectData;
+  }
 }

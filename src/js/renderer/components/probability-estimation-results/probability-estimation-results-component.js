@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 
+// Warning: AI-generated component
 export class ProbabilityEstimationResultsComponent {
     constructor(selector, api) {
         this.selector = selector;
@@ -82,8 +83,8 @@ export class ProbabilityEstimationResultsComponent {
 
                 content.style("grid-template-columns",
                     showThreeColumns
-                        ? "minmax(120px, auto) minmax(150px, 1fr) minmax(100px, auto)"
-                        : "1fr minmax(100px, auto)");
+                        ? "minmax(120px, auto) minmax(150px, 1fr) minmax(50px, auto)"
+                        : "1fr minmax(50px, auto)");
 
                 content.selectAll(".fact-id, .fact-id-header").style("display", displayStyle);
                 content.selectAll(".fact-value, .fact-value-header, .probability-value, .probability-header")
@@ -127,8 +128,7 @@ export class ProbabilityEstimationResultsComponent {
     renderModelSection(container, modelName, factsData) {
         const accordion = container.append("details")
             .attr("class", "model-accordion")
-            .property("open", true)
-            .style("margin-bottom", "1em"); // Добавлен отступ между моделями
+            .property("open", true);
 
         this.renderAccordionHeader(accordion, modelName);
         this.renderFactsTable(accordion, factsData);
@@ -155,7 +155,8 @@ export class ProbabilityEstimationResultsComponent {
             .style("margin-top", "0.5em")
             .style("display", "grid")
             .style("gap", "0.5em 1em")
-            .style("align-items", "center");
+            .style("align-items", "center")
+            .style("margin-bottom", "1em");
 
         this.renderTableHeaders(content);
         this.renderTableRows(content, factsData);

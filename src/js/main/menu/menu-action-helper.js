@@ -1,11 +1,19 @@
 import { CausalRunHelper } from "../causal-cli-integration/causal-run-helper";
+import { DataManager } from "../data-management/data-manager";
+import { DataStore } from "../data-management/data-store";
 
 const { nativeTheme, shell } = require("electron");
 
 export default class MenuActionHelper {
-  constructor(window, projectManager, activeComponentTypes) {
+  /**
+   * 
+   * @param {*} window 
+   * @param {DataManager} dataManager 
+   * @param {*} activeComponentTypes 
+   */
+  constructor(window, dataManager, activeComponentTypes) {
     this.window = window;
-    this.projectManager = projectManager;
+    this.dataManager = dataManager;
     this.causalRunHelper = new CausalRunHelper(window, activeComponentTypes);
   }
 
@@ -30,39 +38,39 @@ export default class MenuActionHelper {
   }
 
   createNewProject() {
-    this.projectManager.createNewProject();
+    this.dataManager.createNewProject();
   }
 
   openProject() {
-    this.projectManager.openProject();
+    this.dataManager.openProject();
   }
 
   saveProject() {
-    this.projectManager.saveProject();
+    this.dataManager.saveProject();
   }
 
   saveProjectAs() {
-    this.projectManager.saveProjectAs();
+    this.dataManager.saveProjectAs();
   }
 
   importCausalModelFacts() {
-    this.projectManager.importCausalModelFacts();
+    this.dataManager.importCausalModelFacts();
   }
 
   exportCausalModelFacts() {
-    this.projectManager.exportCausalModelFacts();
+    this.dataManager.exportCausalModelFacts();
   }
 
-  runCausalBundle() {
+  async runCausalBundle() {
+    await this.causalRunHelper.runCurrentCausalBundle();
+  }
+
+  async runCausalBundleWithSpecifiedModel() {
 
   }
 
-  runCausalBundleWithSpecifiedModel() {
-
-  }
-
-  runProbabilityEstimation() {
-
+  async runProbabilityEstimation() {
+    await this.causalRunHelper.runCurrentCausalBundleProbabilityEstimation();
   }
 
   async runCausalBundleWithFilePicker() {

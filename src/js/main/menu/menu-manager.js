@@ -1,14 +1,22 @@
 const { nativeTheme, shell, ipcMain, Menu, dialog } = require("electron");
 const path = require("path");
+import { DataManager } from "../data-management/data-manager.js";
+import { DataStore } from "../data-management/data-store.js";
 import MenuActionHelper from "./menu-action-helper.js";
 import MenuTemplateBuilder from "./menu-template-builder.js";
 
 export class MenuManager {
-  constructor(projectManager, window) {
+  /**
+   * 
+   * @param {DataManager} dataManager 
+   * @param {*} window 
+   * @param {DataStore} dataStore 
+   */
+  constructor(dataManager, window) {
     this.activeComponentTypes = new Set();
     this.menuActionHelper = new MenuActionHelper(
       window,
-      projectManager,
+      dataManager,
       this.activeComponentTypes);
 
     ipcMain.on("send-component-active", this.onSendComponentActive.bind(this));

@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require("electron");
 const { MenuManager } = require("./menu/menu-manager.js");
 const { DataManager } = require("./data-management/data-manager.js");
 const { ContextMenuManager } = require("./context-menu-manager.js");
+const { DataStore } = require("./data-management/data-store.js");
 
 // Creates the browser window
 function createWindow(appLocale) {
@@ -42,7 +43,8 @@ app.whenReady().then(() => {
   const contextMenuManager = new ContextMenuManager(mainWindow);
   contextMenuManager.setContextMenu();
 
-  dataManager = new DataManager(mainWindow);
+  const dataStore = new DataStore();
+  dataManager = new DataManager(mainWindow, dataStore);
 
   const menuManager = new MenuManager(dataManager, mainWindow);
   menuManager.render();

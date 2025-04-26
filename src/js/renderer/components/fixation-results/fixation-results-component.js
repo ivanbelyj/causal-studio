@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 
+// Warning: AI-generated component
 export class FixationResultsComponent {
     constructor(selector, api) {
         this.selector = selector;
@@ -8,13 +9,17 @@ export class FixationResultsComponent {
         this.notification = null;
         this.resizeObserver = null;
         this.currentComponentWidth = 0;
+        this.currentResultsData = null;
 
         this.initializeEventListeners();
         this.displayEmptyState();
     }
 
     initializeEventListeners() {
-        this.api.onFixationCompleted((event, data) => this.displayResults(data));
+        this.api.onFixationCompleted((event, data) => {
+            this.currentResultsData = data;
+            this.displayResults(data);
+        });
     }
 
     displayResults(data) {
@@ -113,7 +118,10 @@ export class FixationResultsComponent {
             .attr("class", "instance-accordion")
             .property("open", true);
 
-        this.renderAccordionHeader(accordion, instanceData.modelInstance.modelName, instanceId);
+        const summary = this.renderAccordionHeader(accordion, instanceData.modelInstance.modelName, instanceId);
+
+        // Добавляем кнопку копирования в заголовок
+        this.addCopyButtonToHeader(summary, instanceData);
 
         const content = accordion.append("div")
             .style("margin-left", "1.5em")
@@ -126,22 +134,63 @@ export class FixationResultsComponent {
     renderAccordionHeader(accordion, modelName, instanceId) {
         const summary = accordion.append("summary")
             .style("cursor", "pointer")
-            .style("padding", "0.5em 1em")
+            .style("padding", "0.25em 1em")
             .style("margin", "0 0 0.5em 0")
             .style("background", "var(--pale-background)")
             .style("border-radius", "3px")
             .style("border", "1px solid #949494")
             .style("font-weight", "bold")
-            .style("outline", "none");
+            .style("outline", "none")
+            .style("display", "flex")
+            .style("justify-content", "space-between")
+            .style("align-items", "center");
 
-        summary.append("span")
+        const titleContainer = summary.append("div")
+            .style("flex", "1");
+
+        titleContainer.append("span")
             .text(`${modelName} `);
 
-        summary.append("span")
+        titleContainer.append("span")
             .attr("class", "instance-id")
             .style("font-weight", "normal")
             .style("opacity", "0.7")
             .text(instanceId);
+
+        return summary;
+    }
+
+    addCopyButtonToHeader(header, instanceData) {
+        header.append("button")
+            .attr("class", "button")
+            .style("margin-left", "1em")
+            .style("padding", "0.25em 0.5em")
+            .style("font-size", "0.7rem")
+            .style("min-width", "6em")
+            .text("Copy Occurred")
+            .on("click", (event) => {
+                event.stopPropagation();
+                this.copyInstanceFactValues(instanceData, header.node());
+            });
+    }
+
+    copyInstanceFactValues(instanceData, targetElement) {
+        const occurredFacts = instanceData.occurredFacts || [];
+        const factValues = occurredFacts.map(fact => {
+            try {
+                return typeof fact.factValue === 'string'
+                    ? JSON.parse(fact.factValue)
+                    : fact.factValue;
+            } catch {
+                return fact.factValue;
+            }
+        });
+
+        const jsonString = JSON.stringify(factValues, null, 2);
+
+        navigator.clipboard.writeText(jsonString)
+            .then(() => this.showCopyNotification(targetElement, "Occurred facts copied!"))
+            .catch(err => console.error("Failed to copy:", err));
     }
 
     renderFactsSection(container, title, facts, isExpanded) {
@@ -256,23 +305,22 @@ export class FixationResultsComponent {
 
     copyToClipboard(text, targetElement) {
         navigator.clipboard.writeText(text)
-            .then(() => this.showCopyNotification(targetElement))
+            .then(() => this.showCopyNotification(targetElement, "Copied!"))
             .catch(err => console.error("Failed to copy:", err));
     }
 
-    showCopyNotification(targetElement) {
+    showCopyNotification(targetElement, message) {
         if (this.notification) {
             this.notification.remove();
         }
 
-        const position = d3.select(targetElement).node().getBoundingClientRect();
+        const position = targetElement.getBoundingClientRect();
 
         this.notification = d3.select("body")
             .append("div")
             .style("position", "fixed")
             .style("left", `${position.left}px`)
-            .style("top", `${position.top}px`)
-            .style("transform", "translateY(-100%)")
+            .style("top", `${position.bottom + window.scrollY + 5}px`)
             .style("background", "var(--pale-background)")
             .style("border", "1px solid #949494")
             .style("padding", "0.25em 0.5em")
@@ -280,7 +328,7 @@ export class FixationResultsComponent {
             .style("font-size", "0.8em")
             .style("z-index", "1000")
             .style("box-shadow", "0 2px 5px rgba(0,0,0,0.2)")
-            .text("Copied!");
+            .text(message);
 
         setTimeout(() => {
             this.notification?.remove();
