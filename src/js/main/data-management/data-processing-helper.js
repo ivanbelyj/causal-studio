@@ -1,5 +1,5 @@
 import { dialog } from "electron";
-import { FormattingUtils } from "../data/formatting-utils";
+import { FormatUtils } from "../data/format-utils";
 import { ProjectData } from "../data/project-data";
 import { UpgradePipeline } from "../data/upgrade/upgrade-pipeline";
 import { DataValidator } from "../data/validation/data-validator";
@@ -18,11 +18,7 @@ export class DataProcessingHelper {
   }
 
   mutateProjectDataBeforeSave(projectData) {
-    for (const causalModel of projectData.causalModels) {
-      causalModel.facts.forEach((fact) => {
-        FormattingUtils.moveUpTypePropertiesRecursively(fact);
-      });
-    }
+    FormatUtils.formatProjectData(projectData);
   }
 
   async processOpenedProjectData(projectData) {
@@ -32,10 +28,6 @@ export class DataProcessingHelper {
 
     return projectData;
   }
-
-  // processImportedFacts(openedData) {
-  //   ProjectData.createProjectData({ facts: openedData });
-  // }
 
   async #upgradeProjectData(projectData) {
     if (this.upgradePipeline.shouldUpgrade(projectData)) {

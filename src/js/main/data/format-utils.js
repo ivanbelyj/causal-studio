@@ -2,12 +2,20 @@
  * Utils for causal model formatting.
  * Responsible for saving data, not upgrading causal model versions
  */
-export class FormattingUtils {
+export class FormatUtils {
+  static formatProjectData(projectData) {
+    for (const causalModel of projectData.causalModels) {
+      causalModel.facts.forEach((fact) => {
+        FormatUtils.moveUpTypePropertiesRecursively(fact);
+      });
+    }
+  }
+
   static moveUpTypePropertiesRecursively(parentObj) {
-    FormattingUtils.#moveUpTypeProperty(parentObj);
-    FormattingUtils.#traverseObject(
+    FormatUtils.#moveUpTypeProperty(parentObj);
+    FormatUtils.#traverseObject(
       parentObj,
-      FormattingUtils.#moveUpTypeProperty
+      FormatUtils.#moveUpTypeProperty
     );
   }
 
@@ -28,7 +36,7 @@ export class FormattingUtils {
       func(obj[prop]);
 
       if (typeof obj[prop] === "object") {
-        FormattingUtils.#traverseObject(obj[prop], func);
+        FormatUtils.#traverseObject(obj[prop], func);
       }
     }
   }

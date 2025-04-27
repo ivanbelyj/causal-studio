@@ -27,13 +27,12 @@ export class CurrentFileManager {
     this.pullCausalBundleHelper = new PullCausalBundleHelper(window);
   }
 
-  async handleDataToSave(saveType, dataToSave, isPrevPathSave, title) {
+  async handleDataToSave({ saveType, dataToSave, isPrevPathSave, title, fileFilters, mapDataBeforeSaveCallback }) {
     const processedDataToSave =
       this.processDataBeforeSaveCallback?.(dataToSave);
 
-    // Todo: don't pass mapDataBeforeSaveCallback via this?
     const mappedDataToSave =
-      this.mapDataBeforeSaveCallback?.(processedDataToSave ?? dataToSave) ??
+      mapDataBeforeSaveCallback?.(processedDataToSave ?? dataToSave) ??
       processedDataToSave ??
       dataToSave;
 
@@ -48,7 +47,7 @@ export class CurrentFileManager {
       case "save-as":
         const saveRes = await FileUtils.saveByPathFromDialog(
           mappedDataToSave,
-          this.fileFilters ?? null, // Todo: don't pass via this?
+          fileFilters ?? null,
           title
         );
         if (!saveRes.canceled && isPrevPathSave) {
@@ -92,10 +91,8 @@ export class CurrentFileManager {
     isPrevPathSave,
     mapDataBeforeSaveCallback
   ) {
-    this.fileFilters = fileFilters;
-    this.mapDataBeforeSaveCallback = mapDataBeforeSaveCallback;
 
     const { dataToSave } = await this.pullCausalBundleHelper.pullCausalBundle();
-    await this.handleDataToSave(saveType, dataToSave, isPrevPathSave, title);
+    await this.handleDataToSave({ saveType, dataToSave, isPrevPathSave, title, fileFilters, mapDataBeforeSaveCallback });
   }
 }

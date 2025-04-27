@@ -3,12 +3,25 @@ const { MenuManager } = require("./menu/menu-manager.js");
 const { DataManager } = require("./data-management/data-manager.js");
 const { ContextMenuManager } = require("./context-menu-manager.js");
 const { DataStore } = require("./data-management/data-store.js");
+const { SplashScreen } = require("../../splash/splash-screen.js");
+const path = require("path");
 
 // Creates the browser window
-function createWindow(appLocale) {
+async function createWindow(appLocale) {
+  // 1. Show splash screen
+  const splash = new SplashScreen(path.join(__dirname, '../../splash/splash.html'), {
+    width: 480,
+    height: 300,
+    transparent: false
+  });
+
+  await splash.show();
+
+  // 2. Create main window (hidden for now)
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 800, // 640,
+    height: 600, // 360,
+    show: false, // Don't show immediately
     webPreferences: {
       contextIsolation: true,
       sandbox: true,
@@ -20,8 +33,13 @@ function createWindow(appLocale) {
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  mainWindow.webContents.openDevTools();
-  mainWindow.maximize();
+  mainWindow.webContents.once('did-finish-load', async () => {
+    mainWindow.webContents.openDevTools();
+    mainWindow.maximize();
+
+    await splash.hide();
+    mainWindow.show();
+  });
 
   const languages = [appLocale, "en-US"];
   mainWindow.webContents.session.setSpellCheckerLanguages(languages);
@@ -36,9 +54,9 @@ let dataManager;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const appLocale = app.getLocale();
-  mainWindow = createWindow(appLocale);
+  mainWindow = await createWindow(appLocale);
 
   const contextMenuManager = new ContextMenuManager(mainWindow);
   contextMenuManager.setContextMenu();

@@ -147,9 +147,10 @@ export class CausalBundleDataManager extends EventTarget {
 
   #initOpenDataListener(api) {
     api.onOpenData((event, projectData) => {
-      console.log("opened project data: ", projectData);
 
-      this.projectData = new ProjectData(projectData);
+      this.projectData = ProjectData.createProjectData(projectData);
+      console.log("opened project data: ", this.projectData);
+
       this.currentCausalViewDataManager.reset();
 
       eventBus.emit("dataOpened", null, { projectData: this.projectData });

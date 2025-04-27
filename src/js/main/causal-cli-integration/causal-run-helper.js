@@ -1,5 +1,6 @@
 import { app, dialog } from "electron";
 import { CausalCLI } from "./causal-cli";
+import { FormatUtils } from "../data/format-utils";
 const path = require('path');
 
 const eventBus = require("js-event-bus")();
@@ -64,12 +65,17 @@ export class CausalRunHelper {
         return jsonString;
     }
 
+    prepareForCLI(causalBundle) {
+        FormatUtils.formatProjectData(causalBundle)
+        return this.serializeForCLI(causalBundle);
+    }
+
     async runCurrentCausalBundle() {
-        return this.runCausalBundle(this.serializeForCLI(this.#causalBundle));
+        return this.runCausalBundle(this.prepareForCLI(this.#causalBundle));
     }
 
     async runCurrentCausalBundleProbabilityEstimation() {
-        return this.runProbabilityEstimation(this.serializeForCLI(this.#causalBundle));
+        return this.runProbabilityEstimation(this.prepareForCLI(this.#causalBundle));
     }
 
     async runCausalBundle(input) {
@@ -131,7 +137,6 @@ export class CausalRunHelper {
         });
 
         if (filePaths.length === 0) {
-            this.showError('File Selection', 'No file selected');
             return null;
         }
 
