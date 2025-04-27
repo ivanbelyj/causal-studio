@@ -1,10 +1,6 @@
 import * as d3 from "d3";
 
-import { UndoRedoManager } from "../../undo-redo/undo-redo-manager.js";
 import { CausalViewManager } from "../../causal-view/causal-view-manager.js";
-
-// Todo:
-class CausalViewFactory { }
 
 export function createCausalView(container) {
   const unsubscribeFromEvents = () => {
@@ -30,7 +26,7 @@ export function createCausalView(container) {
           this.causalView.structure.getNodesData()
         );
 
-        // Don't know, it's just working
+        // Don't know, it just works
         // Todo: normal solution of the errors on reset
         setTimeout(() => {
           this.causalView.reset(this.savedCausalViewData);

@@ -11,6 +11,7 @@ import { createProjectView } from "./component-factories/create-project-view.js"
 import { createNodeComponent } from "./component-factories/create-node-component.js";
 import { createFixationResultsComponent } from "./component-factories/create-fixation-results-component.js";
 import { createProbabilityEstimationResultsComponent } from "./component-factories/create-probability-estimation-results-component.js";
+import { CausalBundleDataManager } from "../data/causal-bundle-data-manager.js";
 
 const defaultComponentTypesAndFactories = {
   "Causal View": createCausalView,
@@ -24,6 +25,13 @@ const defaultComponentTypesAndFactories = {
 };
 
 export class LayoutManager {
+  /**
+   * 
+   * @param {*} layoutSelector 
+   * @param {*} api 
+   * @param {CausalBundleDataManager} dataManager 
+   * @param {*} undoRedoManager 
+   */
   constructor(layoutSelector, api, dataManager, undoRedoManager) {
     this.layoutContainer = d3
       .select(layoutSelector)

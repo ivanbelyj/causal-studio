@@ -14,8 +14,8 @@ export class CausalBundleDataManager extends EventTarget {
 
     this.api = api;
 
-    this.#initSaveData(api);
-    this.#initOpenData(api);
+    this.#initSaveDataListener(api);
+    this.#initOpenDataListener(api);
   }
 
   get blockConventions() {
@@ -39,6 +39,10 @@ export class CausalBundleDataManager extends EventTarget {
     this.currentCausalViewDataManager = causalViewDataManager;
   }
 
+  applyUnsavedChanges() {
+    this.#applyCurrentChangesToCausalModel();
+  }
+
   //#region Causal Models
   addNewCausalModel(name) {
     this.projectData.addNewCausalModel(name);
@@ -53,6 +57,9 @@ export class CausalBundleDataManager extends EventTarget {
   }
 
   renameCausalModel(oldName, newName) {
+    if (this.currentCausalViewDataManager.causalModelName == oldName) {
+      this.currentCausalViewDataManager.renameCausalModel(newName);
+    }
     this.projectData.renameCausalModel(oldName, newName);
   }
 
@@ -101,46 +108,49 @@ export class CausalBundleDataManager extends EventTarget {
   }
   //#endregion
 
-  #initSaveData(api) {
-    api.onSaveData((event, { dataToSaveId, title }) => {
-      event.sender.send(`data-to-save-${dataToSaveId}`, {
-        dataToSave: this.#getProjectData(),
-        title,
+  #applyCurrentChangesToCausalModel() {
+    if (this.currentCausalViewDataManager.isEmpty) {
+      // Nothing to apply
+      return;
+    }
+
+    const currentCausalModelName = this.currentCausalViewDataManager.causalModelName;
+
+    const currentCausalModel = this.projectData.causalModels.find(
+      x => x.name === currentCausalModelName);
+
+    const { facts, blocks, nodesData } =
+      this.currentCausalViewDataManager.getModelNodesData();
+
+    Object.assign(
+      currentCausalModel,
+      {
+        facts,
+        declaredBlocks: blocks,
+        nodesData,
+        name: currentCausalModelName
+      });
+  }
+
+  #initSaveDataListener(api) {
+    api.onPullCausalBundle((event, { dataToSaveId }) => {
+      this.applyUnsavedChanges();
+      event.sender.send(`pull-causal-bundle-result-${dataToSaveId}`, {
+        // Transform the data to the final form
+        // in order to meet the requirements of the format
+        dataToSave: ProjectData.createProjectData({
+          ...(this.projectData ?? {}),
+        })
       });
     });
   }
 
-  #getProjectData() {
-    return ProjectData.createProjectData({
-      ...(this.projectData ?? {}),
-      causalModels: this.#getCausalModels(),
-    });
-  }
-
-  #getCausalModels() {
-    const { facts, blocks, nodesData } =
-      this.currentCausalViewDataManager.getModelNodesData();
-
-    const currentCausalModel = {
-      facts,
-      declaredBlocks: blocks,
-      nodesData,
-      name: this.currentCausalViewDataManager.causalModelName
-    };
-
-    return [
-      ...this.projectData.causalModels.filter(
-        (x) => x.name != currentCausalModel.name
-      ),
-      currentCausalModel,
-    ];
-  }
-
-  #initOpenData(api) {
+  #initOpenDataListener(api) {
     api.onOpenData((event, projectData) => {
       console.log("opened project data: ", projectData);
 
       this.projectData = new ProjectData(projectData);
+      this.currentCausalViewDataManager.reset();
 
       eventBus.emit("dataOpened", null, { projectData: this.projectData });
     });

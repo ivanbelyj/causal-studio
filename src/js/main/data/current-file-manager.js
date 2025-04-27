@@ -1,10 +1,12 @@
-const { ipcMain } = require("electron");
+import { PullCausalBundleHelper } from "./pull-causal-bundle-helper.js";
+
 const { FileUtils } = require("./file-utils.js");
 
-// Responsible for saving and opening files
+/**
+ * Responsible for saving and opening files
+ */
 export class CurrentFileManager {
   appTitleManager;
-
   #currentFilePath;
 
   // Previous saved path
@@ -21,6 +23,8 @@ export class CurrentFileManager {
     this.appTitleManager = appTitleManager;
     this.processDataBeforeSaveCallback = processDataBeforeSaveCallback;
     this.window = window;
+
+    this.pullCausalBundleHelper = new PullCausalBundleHelper(window);
   }
 
   async handleDataToSave(saveType, dataToSave, isPrevPathSave, title) {
@@ -73,9 +77,14 @@ export class CurrentFileManager {
     return null;
   }
 
-  // Initiates saving the project to a file.
-  // Data to save will be received from "data-to-save" ipc channel
-  // isPrevPathSave - if true, data will be saved by the previous saved path
+  /**
+   * Initiates saving the project to a file.
+   * @param {*} saveType 
+   * @param {*} fileFilters 
+   * @param {*} title 
+   * @param {*} isPrevPathSave if true, data will be saved by the previous saved path
+   * @param {*} mapDataBeforeSaveCallback 
+   */
   async saveData(
     saveType,
     fileFilters,
@@ -86,29 +95,7 @@ export class CurrentFileManager {
     this.fileFilters = fileFilters;
     this.mapDataBeforeSaveCallback = mapDataBeforeSaveCallback;
 
-    return new Promise((resolve, reject) => {
-      // Generate a unique Id for this request
-      const dataToSaveId = Math.random().toString();
-
-      // Listen for the response just once
-      ipcMain.once(
-        `data-to-save-${dataToSaveId}`,
-        async (event, { dataToSave, title }) => {
-          await this.handleDataToSave(
-            saveType,
-            dataToSave,
-            isPrevPathSave,
-            title
-          );
-          resolve();
-        }
-      );
-
-      // Send the request
-      this.window.webContents.send("save-data", {
-        dataToSaveId,
-        title,
-      });
-    });
+    const { dataToSave } = await this.pullCausalBundleHelper.pullCausalBundle();
+    await this.handleDataToSave(saveType, dataToSave, isPrevPathSave, title);
   }
 }

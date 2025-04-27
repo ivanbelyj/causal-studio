@@ -33,7 +33,9 @@ contextBridge.exposeInMainWorld("api", {
 
   onSelectAll: (func) => on("select-all", func),
 
-  onSaveData: (func) => on("save-data", func),
+  // Called from the main process to pull actual current causal bundle
+  // from the renderer process
+  onPullCausalBundle: (func) => on("pull-causal-bundle", func),
 
   // Called to handle saving in undo-redo-manager
   onSavedToCurrentFile: (func) => on("on-saved-to-current-file", func),

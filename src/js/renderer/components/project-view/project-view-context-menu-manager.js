@@ -1,6 +1,4 @@
 import { CausalBundleDataManager } from "../../data/causal-bundle-data-manager";
-import { ConfirmationDialog } from "../../elements/confirmation-dialog";
-import { PromptDialog } from "../../elements/prompt-dialog";
 import { blockCausesConventionNodeType, blockConventionNodeType, causalModelNodeType } from "./js-tree-data-utils";
 import { ProjectViewContextMenuDialogHelper } from "./project-view-context-menu-dialog-helper";
 

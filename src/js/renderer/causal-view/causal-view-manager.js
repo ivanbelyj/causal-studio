@@ -8,6 +8,7 @@ import { CausalViewDataManager } from "./causal-view-data-manager.js";
 import { DeclaredBlockDialog } from "../elements/declared-block-dialog.js";
 import { DeclareBlockHelper } from "./declare-block-helper.js";
 import { CausalViewDataUtils } from "./causal-view-data-utils.js";
+import { CausalBundleDataManager } from "../data/causal-bundle-data-manager.js";
 
 const eventBus = require("js-event-bus")();
 
@@ -18,6 +19,13 @@ export class CausalViewManager {
   structure = null;
   selectionManager = null;
 
+  /**
+   * 
+   * @param {*} selector 
+   * @param {*} api 
+   * @param {*} undoRedoManager 
+   * @param {CausalBundleDataManager} dataManager 
+   */
   constructor(selector, api, undoRedoManager, dataManager) {
     this.undoRedoManager = undoRedoManager;
     this.causesChangeManager = new CausesChangeManager(this);
@@ -67,6 +75,12 @@ export class CausalViewManager {
   }
 
   onCausalModelSelected({ causalModelName }) {
+    if (!causalModelName) {
+      console.error("Selected causal model is not defined. causalModelName: ", causalModelName);
+    }
+    // Apply unsaved data from the causal view to the causal bundle
+    this.dataManager.applyUnsavedChanges();
+
     const selectedCausalModel =
       this.dataManager.projectData.getCausalModel(causalModelName);
     const causalViewData = CausalViewDataUtils.factsAndNodesDataToCausalViewData(selectedCausalModel);
@@ -127,6 +141,7 @@ export class CausalViewManager {
     this.#initEnterLeaveNode();
 
     this.#initSelection();
+    this.#initResetBehaviour();
 
     this.structure.init(this.component, nodesData, this.selectionManager);
   }
@@ -147,7 +162,9 @@ export class CausalViewManager {
     );
 
     this.selectionManager.init(this.structure);
+  }
 
+  #initResetBehaviour() {
     this.api.onReset((event, data) => {
       this.selectionManager.reset();
     });
