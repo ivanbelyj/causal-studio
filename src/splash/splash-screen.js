@@ -18,7 +18,7 @@ export class SplashScreen {
             movable: true,
             enableLargerThanScreen: false,
             hasShadow: false,
-            title: 'Splash Screen',
+            title: 'Causal Studio',
             webPreferences: {
                 nodeIntegration: false,
                 contextIsolation: true,

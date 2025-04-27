@@ -10,6 +10,7 @@ export class ProbabilityEstimationResultsComponent {
         this.resizeObserver = null;
         this.currentComponentWidth = 0;
         this.resizeRequestId = null;
+        this.showThreeColumns = true; // Track current layout state
 
         this.initializeEventListeners();
         this.displayResults(null);
@@ -27,9 +28,16 @@ export class ProbabilityEstimationResultsComponent {
             return;
         }
 
+        // Store current width before re-rendering
+        const currentWidth = this.currentComponentWidth;
+        this.showThreeColumns = currentWidth >= 400;
+
         this.initResizeObserver();
         this.renderInfoSection(data);
         this.renderProbabilitiesSection(data.factsInfoByModelName);
+
+        // Apply current layout immediately
+        this.adjustLayout(this.showThreeColumns);
     }
 
     clearComponent() {
@@ -62,17 +70,15 @@ export class ProbabilityEstimationResultsComponent {
         this.resizeRequestId = requestAnimationFrame(() => {
             if (Math.abs(width - this.currentComponentWidth) > 1) {
                 this.currentComponentWidth = width;
-                this.updateResponsiveLayout(width);
+                this.showThreeColumns = width >= 400;
+                this.updateResponsiveLayout(this.showThreeColumns);
             }
             this.resizeRequestId = null;
         });
     }
 
-    updateResponsiveLayout(width) {
-        requestAnimationFrame(() => {
-            const showThreeColumns = width >= 400;
-            this.adjustLayout(showThreeColumns);
-        });
+    updateResponsiveLayout(showThreeColumns) {
+        this.adjustLayout(showThreeColumns);
     }
 
     adjustLayout(showThreeColumns) {

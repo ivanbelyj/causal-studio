@@ -20,7 +20,6 @@ export class FormatUtils {
   }
 
   static #moveUpTypeProperty(obj) {
-    console.log("move up type property", obj);
     if (obj && typeof obj === "object" && !Array.isArray(obj) && obj.hasOwnProperty("$type")) {
       const { $type, ...objWithoutType } = obj;
 

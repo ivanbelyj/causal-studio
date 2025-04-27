@@ -1,22 +1,15 @@
-import { app, dialog } from "electron";
+import { app, dialog, shell } from "electron";
 import { CausalCLI } from "./causal-cli";
 import { FormatUtils } from "../data/format-utils";
+import { PullCausalBundleHelper } from "../data/pull-causal-bundle-helper";
 const path = require('path');
 
-const eventBus = require("js-event-bus")();
-
 export class CausalRunHelper {
-    #causalBundle;
     constructor(window, activeComponentTypes) {
         this.causalCLI = new CausalCLI(this.getCLIPath());
         this.window = window;
         this.activeComponentTypes = activeComponentTypes;
-
-        eventBus.on("causalBundleOpened", this.onCausalBundleOpened.bind(this));
-    }
-
-    onCausalBundleOpened({ causalBundle }) {
-        this.#causalBundle = causalBundle;
+        this.pullCausalBundleHelper = new PullCausalBundleHelper(window);
     }
 
     getCLIPath() {
@@ -47,42 +40,18 @@ export class CausalRunHelper {
         );
     }
 
-    /**
-     * Serializes the object in JSON with escaping for the CLI
-     * @param {object} data - Object for serialization
-     * @returns {string} - A JSON string ready for transmission to the CLI
-     */
-    serializeForCLI(data) {
-        // 1. Standard serialization in compact JSON
-        const jsonString = JSON.stringify(data);
-
-        // 2. Additional escaping for Windows
-        if (process.platform === 'win32') {
-            return `"${jsonString.replace(/"/g, '\\"')}"`;
-        }
-
-        // 3. For Unix systems, we simply return it as it is.
-        return jsonString;
-    }
-
-    prepareForCLI(causalBundle) {
-        FormatUtils.formatProjectData(causalBundle)
-        return this.serializeForCLI(causalBundle);
-    }
-
     async runCurrentCausalBundle() {
-        return this.runCausalBundle(this.prepareForCLI(this.#causalBundle));
+        return this.runCausalBundle(await this.#getInputArgs());
     }
 
     async runCurrentCausalBundleProbabilityEstimation() {
-        return this.runProbabilityEstimation(this.prepareForCLI(this.#causalBundle));
+        return this.runProbabilityEstimation(await this.#getInputArgs());
     }
 
-    async runCausalBundle(input) {
-        console.log("INPUT ", input);
+    async runCausalBundle(args) {
         try {
             const result = await this.causalCLI.fixate({
-                input: input,
+                ...args,
                 fixatorType: 'Default',
                 outputFormat: 'Json',
                 indented: false
@@ -104,10 +73,10 @@ export class CausalRunHelper {
         }
     }
 
-    async runProbabilityEstimation(input) {
+    async runProbabilityEstimation(args) {
         try {
             const result = await this.causalCLI.monteCarlo({
-                input: input,
+                ...args,
                 fixatorType: 'Default',
                 outputFormat: 'Json',
                 indented: false,
@@ -184,5 +153,18 @@ export class CausalRunHelper {
             detail: error,
             buttons: ['OK']
         });
+    }
+
+    async #getInputArgs() {
+        const { dataToSave } = await this.pullCausalBundleHelper.pullCausalBundle();
+        return {
+            input: "-",
+            stdinData: this.#prepareForCLI(dataToSave)
+        }
+    }
+
+    #prepareForCLI(causalBundle) {
+        FormatUtils.formatProjectData(causalBundle)
+        return JSON.stringify(causalBundle);
     }
 }

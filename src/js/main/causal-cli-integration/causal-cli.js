@@ -3,10 +3,9 @@ const { spawn } = require('child_process');
 export class CausalCLI {
     constructor(cliPath) {
         this.cliPath = cliPath;
-        console.log("Causal CLI path:", cliPath);
     }
 
-    executeCommand(command, args) {
+    executeCommand(command, args, stdinData = null) {
         return new Promise((resolve) => {
             if (!this.cliPath || !require('fs').existsSync(this.cliPath)) {
                 resolve({
@@ -18,7 +17,6 @@ export class CausalCLI {
 
             // Preparing command considering platform
             let finalCommand = [command, ...args];
-            let shell = false;
             let options = {
                 stdio: ['pipe', 'pipe', 'pipe'],
                 windowsVerbatimArguments: true
@@ -26,8 +24,7 @@ export class CausalCLI {
 
             if (process.platform === 'win32') {
                 // Add chcp 65001 for Windows in the beginning of the command
-                finalCommand = ['cmd', '/c', 'chcp', '65001>nul', '&&', this.cliPath, ...finalCommand];
-                shell = true;
+                finalCommand = ['cmd', '/c', 'chcp', '65001', '>', 'nul', '&&', this.cliPath, ...finalCommand];
             } else {
                 // For other platforms just run the command
                 finalCommand = [this.cliPath, ...finalCommand];
@@ -35,8 +32,13 @@ export class CausalCLI {
 
             const cliProcess = spawn(finalCommand[0], finalCommand.slice(1), {
                 ...options,
-                shell: shell
+                shell: false
             });
+
+            if (stdinData) {
+                cliProcess.stdin.write(stdinData);
+                cliProcess.stdin.end();
+            }
 
             let output = '';
             let errorOutput = '';
@@ -78,7 +80,8 @@ export class CausalCLI {
                 if (value) args.push(argName);
             } else {
                 args.push(argName);
-                args.push(value.toString());
+                // For stdin pass "-" without changes
+                args.push(value === '-' ? '-' : value.toString());
             }
         }
 
@@ -87,25 +90,33 @@ export class CausalCLI {
 
     async fixate(options) {
         const args = this.buildArgs({
-            i: options.input,
+            i: options.input === '-' ? '-' : options.input,
             s: options.seed,
             'fixator-type': options.fixatorType,
             format: options.outputFormat,
             indented: options.indented
         });
 
-        return this.executeCommand('fixate', args);
+        return this.executeCommand(
+            'fixate',
+            args,
+            options.input === '-' ? options.stdinData : null
+        );
     }
 
     async monteCarlo(options) {
         const args = this.buildArgs({
-            i: options.input,
+            i: options.input === '-' ? '-' : options.input,
             s: options.seed,
             iterations: options.iterations,
             'fixator-type': options.fixatorType,
             format: options.outputFormat
         });
 
-        return this.executeCommand('montecarlo', args);
+        return this.executeCommand(
+            'montecarlo',
+            args,
+            options.input === '-' ? options.stdinData : null
+        );
     }
 }
