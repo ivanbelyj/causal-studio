@@ -1,10 +1,13 @@
 import { DeclaredBlockComponent } from "../../components/node-components/declared-block-component";
 import { NodeValueComponent } from "../../components/node-components/node-value-component";
 
-export function createNodeComponent(container) {
+export function createNodeComponent(args, container) {
+  Object.assign(this, args);
+  const causalView = args.componentsContext.causalView;
+
   const nodeValueComponent = new NodeValueComponent(
     container.element,
-    this.causalView,
+    causalView,
     this.api,
     this.undoRedoManager
   );
@@ -12,7 +15,7 @@ export function createNodeComponent(container) {
 
   const declaredBlockComponent = new DeclaredBlockComponent(
     container.element,
-    this.causalView,
+    causalView,
     this.api,
     this.undoRedoManager,
     this.dataManager

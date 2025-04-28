@@ -2,7 +2,9 @@ import { CausalModelSettingsComponent } from "../../components/causal-model-sett
 import { CausesConventionsComponent } from "../../components/convention-components/causes-conventions-component";
 import { ConventionsComponent } from "../../components/convention-components/conventions-component";
 
-export function createInspectorComponent(container) {
+export function createInspectorComponent(args, container) {
+    Object.assign(this, args);
+
     const causesConventionsComponent = new CausesConventionsComponent(
         container.element,
         this.api,

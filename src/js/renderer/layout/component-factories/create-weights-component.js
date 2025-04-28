@@ -1,12 +1,16 @@
 import { WeightsComponent } from "../../components/weights-component/weights-component.js";
 
-export function createWeightsComponent(container) {
+export function createWeightsComponent(args, container) {
+  Object.assign(this, args);
+  const causalView = args.componentsContext.causalView;
+  const causesChangeManager = args.componentsContext.causesChangeManager;
+
   const weightsComponent = new WeightsComponent(
     container.element,
-    this.causalView,
+    causalView,
     this.api,
     this.undoRedoManager,
-    this.causesChangeManager
+    causesChangeManager
   );
   weightsComponent.init();
 }

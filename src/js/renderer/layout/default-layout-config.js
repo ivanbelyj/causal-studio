@@ -11,6 +11,7 @@ export const defaultLayoutConfig = {
             componentType: "Project View",
             // id: createId(),
             height: 22,
+            isClosable: false
           },
           {
             type: "component",
@@ -23,6 +24,7 @@ export const defaultLayoutConfig = {
       {
         type: "component",
         componentType: "Causal View",
+        isClosable: false
         // id: createId(),
       },
       {

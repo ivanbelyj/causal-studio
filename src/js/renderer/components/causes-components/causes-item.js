@@ -105,8 +105,8 @@ export class CausesItem {
         );
     }
 
-    const noneOptionVal = "none";
-    [noneOptionVal, "factor", "and", "or", "not"].forEach((optionVal) => {
+    const defaultOptionValue = "factor";
+    [defaultOptionValue, "and", "or", "not"].forEach((optionVal) => {
       typeDropdown
         .append("option")
         .attr("value", optionVal)
@@ -115,7 +115,7 @@ export class CausesItem {
 
     typeDropdown.property(
       "value",
-      this.causesExpressionProvider.get()?.$type ?? noneOptionVal
+      this.causesExpressionProvider.get()?.$type ?? defaultOptionValue
     );
 
     const nodeData = this.causesExpressionProvider.nodeData;

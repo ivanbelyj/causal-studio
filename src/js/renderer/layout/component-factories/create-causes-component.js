@@ -1,22 +1,26 @@
 import { CausesComponent } from "../../components/causes-components/causes-component.js";
 import { BlockCausesComponent } from "../../components/causes-components/block-causes-component.js";
 
-export function createCausesComponent(container) {
+export function createCausesComponent(args, container) {
+  Object.assign(this, args);
+  const causalView = args.componentsContext.causalView;
+  const causesChangeManager = args.componentsContext.causesChangeManager;
+
   const causesComponent = new CausesComponent(
     container.element,
-    this.causalView,
+    causalView,
     this.api,
     this.undoRedoManager,
-    this.causesChangeManager
+    causesChangeManager
   );
   causesComponent.init();
 
   const blockCausesComponent = new BlockCausesComponent(
     container.element,
-    this.causalView,
+    causalView,
     this.api,
     this.undoRedoManager,
-    this.causesChangeManager,
+    causesChangeManager,
     this.dataManager
   );
   blockCausesComponent.init();

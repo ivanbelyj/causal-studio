@@ -19,6 +19,8 @@ export class CausalViewManager {
   structure = null;
   selectionManager = null;
 
+  #eventHandlers;
+
   /**
    * 
    * @param {*} selector 
@@ -30,6 +32,8 @@ export class CausalViewManager {
     this.undoRedoManager = undoRedoManager;
     this.causesChangeManager = new CausesChangeManager(this);
     this.api = api;
+
+    this.#eventHandlers = {};
 
     this.#initNodesApiCallbacks();
 
@@ -58,7 +62,13 @@ export class CausalViewManager {
 
     this.#initDialogs();
 
-    eventBus.on("causalModelSelected", this.onCausalModelSelected.bind(this));
+    this.#eventHandlers.causalModelSelected = this.onCausalModelSelected.bind(this);
+    eventBus.on("causalModelSelected", this.#eventHandlers.causalModelSelected);
+  }
+
+  destroy() {
+    // Todo: implement fully
+    eventBus.off("causalModelSelected", this.#eventHandlers.causalModelSelected);
   }
 
   reset(nodesData) {

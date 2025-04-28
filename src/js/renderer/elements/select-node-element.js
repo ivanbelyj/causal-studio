@@ -113,7 +113,7 @@ export class SelectNodeElement {
   }
 
   #onClearButtonClick(event) {
-    this.#setIdInputAndCancelSelectionButton("");
+    this.#setIdInputAndCancelSelectionButton(null);
   }
 
   onNodeClicked(event) {

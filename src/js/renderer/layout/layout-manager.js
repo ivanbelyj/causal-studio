@@ -13,7 +13,7 @@ import { createFixationResultsComponent } from "./component-factories/create-fix
 import { createProbabilityEstimationResultsComponent } from "./component-factories/create-probability-estimation-results-component.js";
 import { CausalBundleDataManager } from "../data/causal-bundle-data-manager.js";
 
-const defaultComponentTypesAndFactories = {
+const defaultComponentFactoriesByType = {
   "Causal View": createCausalView,
   "Node": createNodeComponent,
   Causes: createCausesComponent,
@@ -50,7 +50,7 @@ export class LayoutManager {
 
     this.#initGoldenLayout();
 
-    this.#registerComponents(defaultComponentTypesAndFactories);
+    this.#registerComponents(defaultComponentFactoriesByType);
     this.#loadConfig(config);
 
     this.api.onSetComponentActive(this.#onSetComponentActive.bind(this));
@@ -120,7 +120,7 @@ export class LayoutManager {
   #loadConfig(config) {
     const loadedFromConfig =
       LayoutConfigUtils.getComponentTypesFromLayoutConfig(config);
-    for (const componentType in defaultComponentTypesAndFactories) {
+    for (const componentType in defaultComponentFactoriesByType) {
       this.api.sendComponentActive({
         componentType,
         isActive: loadedFromConfig.includes(componentType),
@@ -134,12 +134,25 @@ export class LayoutManager {
    * - Every factory function will be bound to this LayoutManager
    */
   #registerComponents(componentTypesAndFactories) {
+    // Components can put something here (in particular,
+    // causalView reference will be available in this object)
+    const componentsContext = {};
+    const args = {
+      layoutContainer: this.layoutContainer,
+      api: this.api,
+      componentTypesAndItems: this.componentTypesAndItems,
+      dataManager: this.dataManager,
+      undoRedoManager: this.undoRedoManager,
+      layout: this.layout,
+      componentsContext
+    };
+
     for (const [componentType, factoryFunc] of Object.entries(
       componentTypesAndFactories
     )) {
       this.layout.registerComponentFactoryFunction(
         componentType,
-        factoryFunc.bind(this)
+        factoryFunc.bind({}, args)
       );
     }
   }
