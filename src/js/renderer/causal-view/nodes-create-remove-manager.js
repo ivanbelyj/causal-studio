@@ -4,11 +4,14 @@ import { ScreenUtils } from "./screen-utils.js";
 import { Command } from "../undo-redo/commands/command.js";
 import { CausalViewNodeUtils } from "./render/causal-view-node-utils.js";
 
-// Class that allows to create or remove nodes in causal view
+/**
+ * Class that allows to create or remove nodes in causal view
+ */
 export class NodesCreateRemoveManager {
-  constructor(causalView, causesChangeManager) {
+  constructor(causalView, causesChangeManager, getNewFactValue) {
     this.causalView = causalView;
     this.causesChangeManager = causesChangeManager;
+    this.getNewFactValue = getNewFactValue;
   }
 
   getCreateNodeCommand(x, y, nodeData) {
@@ -47,7 +50,7 @@ export class NodesCreateRemoveManager {
   }
 
   createNodeData() {
-    const newFact = CausalModelUtils.createNewFactWithFactor();
+    const newFact = CausalModelUtils.createNewFactWithFactor(this.getNewFactValue());
     newFact.id = crypto.randomUUID();
     return { fact: newFact };
   }

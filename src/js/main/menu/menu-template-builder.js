@@ -48,12 +48,12 @@ export default class MenuTemplateBuilder {
             click: async () => await menuActionHelper.openProject(),
           },
           {
-            label: "Save Project",
+            label: "Save",
             accelerator: "CmdOrCtrl+S",
             click: async () => await menuActionHelper.saveProject(),
           },
           {
-            label: "Save Project As...",
+            label: "Save As...",
             accelerator: "CmdOrCtrl+Shift+S",
             click: async () => await menuActionHelper.saveProjectAs(),
           },

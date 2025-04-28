@@ -52,7 +52,8 @@ export class CausalViewManager {
 
     this.nodesCreateRemoveManager = new NodesCreateRemoveManager(
       this.structure,
-      this.causesChangeManager
+      this.causesChangeManager,
+      () => this.dataManager.getCurrentCausalModelFactValueTemplate()
     );
 
     this.#initDialogs();

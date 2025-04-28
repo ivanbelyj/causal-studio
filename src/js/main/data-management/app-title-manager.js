@@ -1,5 +1,5 @@
 const path = require("path");
-const appDefaultTitle = "Causal Editor";
+const appDefaultTitle = "Causal Studio";
 
 // Responsible for app title changing
 export class AppTitleManager {

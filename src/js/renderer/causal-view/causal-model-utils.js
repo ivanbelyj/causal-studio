@@ -1,4 +1,6 @@
 export class CausalModelUtils {
+  static lastCreatedFactNumber = 0;
+
   static findCauseIds(obj) {
     let edgeProps = new Set();
     for (let prop in obj) {
@@ -12,29 +14,11 @@ export class CausalModelUtils {
       }
       if (typeof obj[prop] === "object") {
         const nestedEdgeProps = CausalModelUtils.findCauseIds(obj[prop]);
-        // for (const nestedEdgeProp in nestedEdgeProps) {
-        //   if (!edgeProps.has(nestedEdgeProp)) edgeProps.add(nestedEdgeProp);
-        // }
         edgeProps = new Set(Array.from(edgeProps).concat(nestedEdgeProps));
       }
     }
     return [...edgeProps];
   }
-
-  // static traverseInnerExpressions(obj, func) {
-  //   for (let prop in obj) {
-  //     if (
-  //       ["operands", "edge"].find(
-  //         (exprProp) => obj[prop] && obj[prop].hasOwnProperty(exprProp)
-  //       )
-  //     )
-  //       func(obj[prop]);
-
-  //     if (typeof obj[prop] === "object") {
-  //       CausalModelUtils.traverseInnerExpressions(obj[prop], func);
-  //     }
-  //   }
-  // }
 
   static getWeightsEdgesIds(causalModelFact) {
     const weightEdges = causalModelFact.weights;
@@ -94,8 +78,7 @@ export class CausalModelUtils {
     };
   }
 
-  static lastCreatedFactNumber = 0;
-  static createNewFactWithFactor() {
+  static createNewFactWithFactor(factValue) {
     return {
       id: null,
       causesExpression: {
@@ -104,7 +87,7 @@ export class CausalModelUtils {
           probability: 1,
         },
       },
-      factValue: `New Fact ${++CausalModelUtils.lastCreatedFactNumber}`,
+      factValue: factValue || `New Fact ${++CausalModelUtils.lastCreatedFactNumber}`,
     };
   }
 

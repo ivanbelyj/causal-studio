@@ -14,6 +14,7 @@ export class CausesConventionsComponent extends ProjectDataComponent {
             inputId: "convention-name",
             propName: "name",
             isInnerProp: false,
+            isReadonly: true
         });
 
         this.appendTextInputItem({

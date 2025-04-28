@@ -43,6 +43,15 @@ export class CausalBundleDataManager extends EventTarget {
     this.#applyCurrentChangesToCausalModel();
   }
 
+  getCurrentCausalModelFactValueTemplate() {
+    return this.#getCausalModelByName(this.currentCausalViewDataManager.causalModelName)
+      .factValueTemplate;
+  }
+
+  #getCausalModelByName(causalModelName) {
+    return this.projectData.causalModels.find(x => x.name === causalModelName);
+  }
+
   //#region Causal Models
   addNewCausalModel(name) {
     this.projectData.addNewCausalModel(name);

@@ -76,7 +76,7 @@ export class DataManager {
     await this.filesManager.saveData(
       "save",
       projectFileFilters,
-      "Save project",
+      "Save",
       true
     );
   }
@@ -85,7 +85,7 @@ export class DataManager {
     await this.filesManager.saveData(
       "save-as",
       projectFileFilters,
-      "Save project as",
+      "Save As",
       true
     );
   }
