@@ -84,7 +84,6 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             optionValues: this.blockConventionsProvider.blockConventions.map(x => x.name),
             overrideInputHandling: this.switchConvention.bind(
                 this,
-                this.#getBlockConsequenceNames.bind(this),
                 "blockConsequencesMap")
         });
 
@@ -97,7 +96,6 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             optionValues: this.blockConventionsProvider.blockCausesConventions.map(x => x.name),
             overrideInputHandling: this.switchConvention.bind(
                 this,
-                this.#getBlockCauseNames.bind(this),
                 "blockCausesMap")
         });
         this.nodeDataProvider.addEventListener(
@@ -107,7 +105,6 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
 
     // Works for convention and causes convention switching
     switchConvention(
-        getBlockReferenceNames,
         referenceMapPropertyName,
         { propertyName, newValue }) {
         // We define custom input handling so changes weren't applied

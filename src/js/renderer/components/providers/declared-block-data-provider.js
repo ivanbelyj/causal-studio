@@ -39,9 +39,15 @@ export class DeclaredBlockDataProvider extends NodeDataProvider {
         newReferenceMap = { ...newReferenceMap };
 
         const setBlockReferences = ({ newValue, newBlockReferences }) => {
+            // Ensure reference map property exists
+            if (!declaredBlock[referenceMapPropertyName]) {
+                declaredBlock[referenceMapPropertyName] = {};
+            }
+
             // 1. Reference map
             // Get object that contains references
             const referenceMap = declaredBlock[referenceMapPropertyName];
+
             const previousCauses = Object.values(declaredBlock[referenceMapPropertyName]);
 
             // Clear previous reference map
