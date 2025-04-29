@@ -1,14 +1,20 @@
 import { BaseNodeComponent } from "./base-node-component"
 import { DeclaredBlockDataProvider } from "../providers/declared-block-data-provider";
+import BlockUtils from "../../common/block-utils";
+
+const eventBus = require("js-event-bus")();
 
 export class DeclaredBlockComponent extends BaseNodeComponent {
-    constructor(selector, causalView, api, undoRedoManager, blockConventionsProvider) {
+    #lastRenderedBlock;
+    constructor(selector, causalView, api, undoRedoManager, blockConventionsProvider, causesChangeManager) {
         super(selector, causalView, api, undoRedoManager);
         this.blockConventionsProvider = blockConventionsProvider;
+        this.causesChangeManager = causesChangeManager;
     }
 
     renderNode(nodeData) {
         if (nodeData.block) {
+            this.#lastRenderedBlock = nodeData.block;
             this.#renderBlockNode(nodeData.block);
         } else {
             console.warn("Unsupported node type for DeclaredBlockComponent.");
@@ -20,7 +26,36 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
     }
 
     createNodeDataProvider() {
-        return new DeclaredBlockDataProvider(this.undoRedoManager, null)
+        return new DeclaredBlockDataProvider(this.undoRedoManager, this.causesChangeManager)
+    }
+
+    handlePropertyChanged({ propertyName, newValue: propertyValue }) {
+        if (propertyName === "convention") {
+            eventBus.emit("blockConventionChanged", null, {
+                blockId: this.#lastRenderedBlock.id,
+                newValue: propertyValue
+            });
+        }
+        else if (propertyName === "causesConvention") {
+            eventBus.emit("blockCausesConventionChanged", null, {
+                blockId: this.#lastRenderedBlock.id,
+                newValue: propertyValue
+            });
+        }
+    }
+
+    #getBlockCauseNames(causesConventionName) {
+        return BlockUtils.getBlockCauseNames(
+            this.blockConventionsProvider.blockCausesConventions,
+            causesConventionName
+        );
+    }
+
+    #getBlockConsequenceNames(conventionName) {
+        return BlockUtils.getBlockConsequenceNames(
+            this.blockConventionsProvider.blockConventions,
+            conventionName
+        );
     }
 
     #renderBlockNode() {
@@ -47,6 +82,10 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             propName: "convention",
             isInnerProp: true,
             optionValues: this.blockConventionsProvider.blockConventions.map(x => x.name),
+            overrideInputHandling: this.switchConvention.bind(
+                this,
+                this.#getBlockConsequenceNames.bind(this),
+                "blockConsequencesMap")
         });
 
         this.#appendSelectItem({
@@ -56,7 +95,32 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             propName: "causesConvention",
             isInnerProp: true,
             optionValues: this.blockConventionsProvider.blockCausesConventions.map(x => x.name),
+            overrideInputHandling: this.switchConvention.bind(
+                this,
+                this.#getBlockCauseNames.bind(this),
+                "blockCausesMap")
         });
+        this.nodeDataProvider.addEventListener(
+            "property-changed",
+            this.handlePropertyChanged.bind(this));
+    }
+
+    // Works for convention and causes convention switching
+    switchConvention(
+        getBlockReferenceNames,
+        referenceMapPropertyName,
+        { propertyName, newValue }) {
+        // We define custom input handling so changes weren't applied
+        // to the actual data. Apply them
+        this.nodeDataProvider.switchBlockReferences(
+            {
+                propertyName,
+                referenceMapPropertyName,
+                newValue,
+                oldReferenceMap: this.nodeDataProvider.getBlock()[referenceMapPropertyName],
+                newReferenceMap: {}
+            }
+        );
     }
 
     #appendSelectItem(args) {
@@ -67,7 +131,7 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             dontShowLabel,
             propName,
             isInnerProp,
-            optionValues
+            optionValues,
         } = args;
 
         return this.appendInputItemCore(inputItem => {

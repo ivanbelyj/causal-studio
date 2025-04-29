@@ -7,20 +7,22 @@ export class BaseNodeComponent {
         this.component = d3.select(selector);
         this.causalView = causalView;
         this.undoRedoManager = undoRedoManager;
-        this.nodeDataProvider = this.createNodeDataProvider();
 
         api.onReset(() => this.resetProvider(null));
-
-        this.nodeDataProvider.addEventListener("reset", () => this.reset());
-        this.nodeDataProvider.addEventListener("mutated", () => {
-            console.log("Data mutated", this.nodeDataProvider.get());
-        });
     }
 
     init() {
         this.component.classed("component", true);
 
         this.#addSelectionEventListeners();
+
+        this.nodeDataProvider = this.createNodeDataProvider();
+
+        this.nodeDataProvider.addEventListener("reset", () => this.reset());
+        this.nodeDataProvider.addEventListener("mutated", () => {
+            console.log("Data mutated", this.nodeDataProvider.get());
+            this.reset(this.nodeDataProvider.get());
+        });
     }
 
     #addSelectionEventListeners() {
@@ -60,14 +62,22 @@ export class BaseNodeComponent {
     }
 
     setupInputListeners() {
-        this.getPropNamesToData().forEach(([propertyName, { input, isInnerProp }]) => {
+        this.getPropNamesToData().forEach(([propertyName, { input, isInnerProp, overrideInputHandling }]) => {
+            // Apply the change to the actual data
             input.on("input", () => {
-                this.nodeDataProvider.changeNonCauseProperty(
-                    propertyName,
-                    isInnerProp,
-                    input.property("value"),
-                    this.causalView.structure
-                );
+                // Custom applying to the actual data
+                const propertyValue = input.property("value");
+                if (overrideInputHandling) {
+                    overrideInputHandling({ propertyName, newValue: propertyValue })
+                } else {
+                    // Typical properties (like 'name', 'title', etc.)
+                    this.nodeDataProvider.changeNonCauseProperty(
+                        propertyName,
+                        isInnerProp,
+                        propertyValue,
+                        this.causalView.structure
+                    );
+                }
             });
 
             this.updateInput(input, propertyName, isInnerProp);
@@ -114,6 +124,7 @@ export class BaseNodeComponent {
             dontShowLabel,
             propName,
             isInnerProp,
+            overrideInputHandling
         }) {
         const inputItem = this.component.append("div").attr("class", "input-item");
 
@@ -129,7 +140,7 @@ export class BaseNodeComponent {
             this.propNameToData = new Map();
         }
         if (propName)
-            this.propNameToData.set(propName, { input, isInnerProp });
+            this.propNameToData.set(propName, { input, isInnerProp, overrideInputHandling });
 
         return input;
     }

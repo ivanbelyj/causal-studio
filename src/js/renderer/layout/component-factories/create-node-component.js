@@ -4,6 +4,7 @@ import { NodeValueComponent } from "../../components/node-components/node-value-
 export function createNodeComponent(args, container) {
   Object.assign(this, args);
   const causalView = args.componentsContext.causalView;
+  const causesChangeManager = args.componentsContext.causesChangeManager;
 
   const nodeValueComponent = new NodeValueComponent(
     container.element,
@@ -18,7 +19,8 @@ export function createNodeComponent(args, container) {
     causalView,
     this.api,
     this.undoRedoManager,
-    this.dataManager
+    this.dataManager,
+    causesChangeManager
   );
   declaredBlockComponent.init();
 }

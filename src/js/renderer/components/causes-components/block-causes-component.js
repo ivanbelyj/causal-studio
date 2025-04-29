@@ -1,8 +1,12 @@
 import { BaseCausesComponent } from "./base-causes-component";
 import { SelectNodeElement } from "../../elements/select-node-element";
 import { DeclaredBlockDataProvider } from "../providers/declared-block-data-provider";
+import BlockUtils from "../../common/block-utils";
+
+const eventBus = require("js-event-bus")();
 
 export class BlockCausesComponent extends BaseCausesComponent {
+    #lastRenderedBlock;
     constructor(
         selector,
         causalView,
@@ -18,6 +22,16 @@ export class BlockCausesComponent extends BaseCausesComponent {
         this.declaredBlockDataProvider.addEventListener(
             "mutated",
             () => this.reset(this.declaredBlockDataProvider.get()));
+
+        eventBus.on(
+            "blockCausesConventionChanged",
+            this.onNodeBlockCausesConventionChanged.bind(this));
+    }
+
+    onNodeBlockCausesConventionChanged({ blockId, newValue }) {
+        if (this.#lastRenderedBlock.id === blockId) {
+            this.reset(this.declaredBlockDataProvider.get())
+        }
     }
 
     shouldHandleReset(nodeData) {
@@ -25,7 +39,9 @@ export class BlockCausesComponent extends BaseCausesComponent {
     }
 
     render(nodeData) {
-        const blockCauses = this.#getBlockCauseNames("TestCausesConvention");
+        this.#lastRenderedBlock = nodeData.block;
+
+        const blockCauses = this.#getBlockCauseNames(nodeData.block.causesConvention);
 
         for (const blockCauseName of blockCauses) {
             this.#addSelectNodeItem(
@@ -38,12 +54,10 @@ export class BlockCausesComponent extends BaseCausesComponent {
     }
 
     #getBlockCauseNames(causesConventionName) {
-        const blockCauses = this
-            .blockConventionsProvider
-            .blockCausesConventions
-            .find(x => x.name === causesConventionName)
-            ?.causes;
-        return blockCauses ?? [];
+        return BlockUtils.getBlockCauseNames(
+            this.blockConventionsProvider.blockCausesConventions,
+            causesConventionName
+        );
     }
 
     #addSelectNodeItem(selection, blockCauseName, initialId) {
