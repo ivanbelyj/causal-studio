@@ -21,6 +21,7 @@ export class CausesComponent extends BaseCausesComponent {
         this.causesChangeManager,
         nodeData
       ),
+      blockConventionsProvider: this.blockConventionsProvider
     });
     rootCausesItem.resetProvider(rootCausesExpr);
   }

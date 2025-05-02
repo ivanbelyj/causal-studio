@@ -54,7 +54,7 @@ export class CausesChangeManager {
 
   // !!! It is assumed that removeCauseIds are already removed from causalFact
   onCausesRemoved(nodeData, removedCauseIds) {
-    if (!nodeData) throw new Error("node data can't be ", nodeData);
+    if (!nodeData) throw new Error("Node data can't be ", nodeData);
     for (const removedId of this.getCauseIdsToRemove(
       nodeData,
       removedCauseIds

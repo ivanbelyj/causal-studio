@@ -146,11 +146,12 @@ export class EdgeRenderer {
 
     const edgePathsSelection = d3.selectAll(".edge");
     edgePathsSelection.attr("stroke-dasharray", ({ source, target }) => {
-      const factSrc = source.data.fact;
-      const factTarget = target.data.fact;
+      const srcNodeData = source.data;
+      const targetFact = target.data.fact;
 
-      return factTarget?.abstractFactId &&
-        factTarget.abstractFactId == factSrc.id
+      return targetFact?.abstractFactId &&
+        CausalViewNodeUtils.canBeReferencedInViewBy(srcNodeData, targetFact.abstractFactId)
+        // factTarget.abstractFactId == factSrc.id
         ? ""
         : "5,5";
     });

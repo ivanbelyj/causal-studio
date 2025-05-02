@@ -1,5 +1,6 @@
 import { CausalModelUtils } from "../../causal-view/causal-model-utils";
 import { CausalViewNodeUtils } from "../../causal-view/render/causal-view-node-utils";
+import BlockUtils from "../../common/block-utils";
 import { Command } from "../../undo-redo/commands/command";
 import { DataProvider } from "./data-provider";
 
@@ -137,6 +138,53 @@ export class CausesExpressionProvider extends DataProvider {
   }
 
   changeCauseId(nodeData, newCauseId) {
+    const {
+      executeCallback,
+      undoCallback
+    } = this.#getChangeCauseIdCallbacks(nodeData, newCauseId);
+    const cmd = new Command(
+      executeCallback,
+      undoCallback
+    );
+    this.undoRedoManager.execute(cmd);
+  }
+
+  changeCauseIdAndBlockConsequenceMapping(
+    nodeData,
+    declaredBlock,
+    blockConsequenceName) {
+    // Block consequence was selected as a cause in a fact causes expression.
+    // 1. Create mapping for the block (expose block consequence for our model)
+    // 2. Change cause id
+
+    const {
+      executeCallback: setBlockConsequenceMapping,
+      undoCallback: removeBlockConsequenceMapping,
+      causeId
+    } = BlockUtils.getChangeBlockConsequenceMappingCallbacks(declaredBlock, blockConsequenceName);
+
+    const {
+      executeCallback: changeCauseId,
+      undoCallback: undoChangeCauseId
+    } = this.#getChangeCauseIdCallbacks(nodeData, causeId);
+
+    const cmd = new Command(
+      () => {
+        setBlockConsequenceMapping();
+        changeCauseId();
+      },
+      () => {
+        undoChangeCauseId();
+        removeBlockConsequenceMapping();
+      }
+    );
+    this.undoRedoManager.execute(cmd);
+  }
+
+  /**
+   * Returns two callbacks that can be used for building undo-redo commands
+   */
+  #getChangeCauseIdCallbacks(nodeData, newCauseId) {
     const expr = this._causesExpression;
     const setCauseId = function (causeId) {
       const oldId = expr.edge.causeId;
@@ -150,11 +198,11 @@ export class CausesExpressionProvider extends DataProvider {
       this._dispatchMutated();
     }.bind(this);
     const oldCauseId = this._causesExpression?.edge?.causeId;
-    const cmd = new Command(
-      () => setCauseId(newCauseId),
-      () => setCauseId(oldCauseId)
-    );
-    this.undoRedoManager.execute(cmd);
+
+    return {
+      executeCallback: () => setCauseId(newCauseId),
+      undoCallback: () => setCauseId(oldCauseId)
+    };
   }
 
   addNewOperand() {

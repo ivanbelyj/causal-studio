@@ -1,9 +1,9 @@
 export class DeclareBlockHelper {
-  createBlock({ declaredBlockId, blockConvention }) {
+  createBlock({ declaredBlockId, blockConvention, blockCausesConvention }) {
     return {
       id: declaredBlockId,
       convention: blockConvention,
-      causesConvention: null,
+      causesConvention: blockCausesConvention,
       blockCausesMap: {
 
       },

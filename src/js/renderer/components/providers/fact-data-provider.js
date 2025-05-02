@@ -1,3 +1,4 @@
+import BlockUtils from "../../common/block-utils";
 import { Command } from "../../undo-redo/commands/command";
 import { CommandUtils } from "../../undo-redo/commands/command-utils";
 import { MacroCommand } from "../../undo-redo/commands/macro-command";
@@ -102,19 +103,20 @@ export class FactDataProvider extends NodeDataProvider {
         );
     }
 
-    changeAbstractFactId(newAbstrId) {
+    changeAbstractFactId(newAbstrId, blockData) {
         const causalFact = this.getFact();
         const oldAbstrId = causalFact.abstractFactId;
         const nodeData = this._data;
+        const commands = [];
 
-        let cmdToExecute = new Command(
+        commands.push(new Command(
             () => {
                 this.#changeAbstractFactId(nodeData, newAbstrId);
             },
             () => {
                 this.#changeAbstractFactId(nodeData, oldAbstrId);
             }
-        );
+        ));
 
         if (!this.#getWeights(nodeData)?.length && newAbstrId) {
             const defaultWeightEdge = this.#createDefaultWeightEdge(newAbstrId);
@@ -129,10 +131,22 @@ export class FactDataProvider extends NodeDataProvider {
                     this.#removeWeightEdge(nodeData, defaultWeightEdge);
                 }
             );
-            cmdToExecute = MacroCommand.fromCommands(cmdToExecute, addRemoveEdgeCmd);
+            commands.push(addRemoveEdgeCmd);
         }
 
-        this.undoRedoManager.execute(cmdToExecute);
+        if (blockData) {
+            this.#addChangeBlockConsequenceMappingCommand(commands, blockData);
+        }
+
+        this.undoRedoManager.execute(MacroCommand.fromCommands(...commands));
+    }
+
+    #addChangeBlockConsequenceMappingCommand(commands, blockData) {
+        const { declaredBlock, blockConsequenceName } = blockData;
+        const newCmd = BlockUtils.createChangeBlockConsequenceMappingCommand(
+            declaredBlock,
+            blockConsequenceName);
+        commands.unshift(newCmd);
     }
 
     #changeAbstractFactId(nodeData, newId) {
@@ -151,7 +165,7 @@ export class FactDataProvider extends NodeDataProvider {
     //   return this.#getWeights().find((edge) => edge === weightEdge);
     // }
 
-    changeWeightEdgeWeight(weightEdge, newWeight) {
+    changeWeightEdgeWeight(weightEdge, newWeight, blockData) {
         const setWeightEdge = (weight) => {
             // const actualWeightEdge = this.#getActualWeightEdge(weightEdge);
             weightEdge.weight = weight;
@@ -165,15 +179,10 @@ export class FactDataProvider extends NodeDataProvider {
             newWeight,
             oldWeight
         );
-        // const cmd = new Command(
-        //   () => setWeightEdge(newWeight),
-        //   () => setWeightEdge(oldWeight)
-        // );
-        // this.undoRedoManager.execute(cmd);
     }
 
     // Todo: test with undo and non-clear redo stack selection
-    changeWeightEdgeCauseId(weightEdge, newCauseId) {
+    changeWeightEdgeCauseId(weightEdge, newCauseId, blockData) {
         const nodeData = this._data;
         const setWeightEdge = (newCauseId) => {
             // const actualWeightEdge = this.#getActualWeightEdge(weightEdge);
@@ -188,16 +197,16 @@ export class FactDataProvider extends NodeDataProvider {
         };
         const oldCauseId = weightEdge.causeId;
 
-        CommandUtils.executeChangeStateCommand(
-            this.undoRedoManager,
-            setWeightEdge,
-            newCauseId,
-            oldCauseId
+        const cmd = new Command(
+            () => setWeightEdge(newCauseId),
+            () => setWeightEdge(oldCauseId)
         );
-        // const cmd = new Command(
-        //   () => setWeightEdge(newCauseId),
-        //   () => setWeightEdge(oldCauseId)
-        // );
-        // this.undoRedoManager.execute(cmd);
+        const commands = [cmd];
+
+        if (blockData) {
+            this.#addChangeBlockConsequenceMappingCommand(commands, blockData);
+        }
+
+        this.undoRedoManager.execute(MacroCommand.fromCommands(...commands));
     }
 }

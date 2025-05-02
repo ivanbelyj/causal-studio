@@ -2,15 +2,17 @@ import * as d3 from "d3";
 import { SelectNodeElement } from "../../elements/select-node-element.js";
 import binSrc from "../../../../images/bin.svg";
 import { FactDataProvider } from "../providers/fact-data-provider.js";
+import BlockUtils from "../../common/block-utils.js";
 
 // Block is used as a part of a component
 export class WeightsComponent {
-  constructor(selector, causalView, api, undoRedoManager, causesChangeManager) {
+  constructor(selector, causalView, api, undoRedoManager, causesChangeManager, blockConventionsProvider) {
     // Parent element
     this.component = d3.select(selector);
     this.causalView = causalView;
 
     this.causesChangeManager = causesChangeManager;
+    this.blockConventionsProvider = blockConventionsProvider;
 
     api.onReset(
       function (event, data) {
@@ -99,7 +101,13 @@ export class WeightsComponent {
     new SelectNodeElement(
       this.component.append("div").node(),
       this.causalView,
-      this.nodeDataProvider.changeAbstractFactId.bind(this.nodeDataProvider)
+      this.blockConventionsProvider,
+      this.nodeDataProvider.changeAbstractFactId.bind(this.nodeDataProvider),
+      ({ block, blockConsequenceName }) => {
+        this.nodeDataProvider.changeAbstractFactId(
+          BlockUtils.createCauseIdByBlockConsequence(block.id, blockConsequenceName),
+          { declaredBlock: block, blockConsequenceName })
+      }
     ).init(this.nodeDataProvider.getFact().abstractFactId);
   }
 
@@ -148,9 +156,16 @@ export class WeightsComponent {
     new SelectNodeElement(
       itemContent.append("div").node(),
       this.causalView,
+      this.blockConventionsProvider,
       function (newId) {
         this.nodeDataProvider.changeWeightEdgeCauseId(weightEdge, newId);
-      }.bind(this)
+      }.bind(this),
+      ({ block, blockConsequenceName }) => {
+        this.nodeDataProvider.changeWeightEdgeCauseId(
+          weightEdge,
+          BlockUtils.createCauseIdByBlockConsequence(block.id, blockConsequenceName),
+          { declaredBlock: block, blockConsequenceName })
+      }
     ).init(weightEdge.causeId);
   }
 }

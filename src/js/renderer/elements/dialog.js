@@ -10,7 +10,7 @@ export class Dialog {
       mainContent,
       continueButtonContent,
       closeButtonContent,
-      focusOnContinue = false
+      focusOnContinue = false,
     }
   ) {
     this.modalId = modalId;
@@ -32,8 +32,7 @@ export class Dialog {
                 <footer class="modal__footer">
                   <button
                     id="${this.continueButtonId}"
-                    class="button modal__btn modal__btn-primary">${continueButtonContent ?? "Continue"
-      }</button>
+                    class="button modal__btn modal__btn-primary">${continueButtonContent ?? "Continue"}</button>
                   <button class="button modal__btn" data-micromodal-close aria-label="Close this dialog window">
                     ${closeButtonContent ?? "Close"}
                   </button>
@@ -52,12 +51,16 @@ export class Dialog {
 
     wrapper.html(this.modalContentTemplate);
 
-    d3.select(`#${this.#getDialogElementContent()}`)
-      .node()
-      .appendChild(this.mainContent.node());
+    if (!this.createMainContent && this.mainContent) {
+      this.#updateContent(this.mainContent);
+    }
   }
 
   show() {
+    if (this.createMainContent) {
+      this.#updateContent(this.createMainContent());
+    }
+
     MicroModal.show(this.modalId, {
       awaitCloseAnimation: true,
     });
@@ -69,6 +72,14 @@ export class Dialog {
 
   close() {
     MicroModal.close(this.modalId);
+  }
+
+  #updateContent(mainContent) {
+    if (mainContent) {
+      const contentElement = d3.select(`#${this.#getDialogElementContent()}`);
+      contentElement.selectAll('*').remove(); // Clear previous content
+      contentElement.node().appendChild(mainContent.node());
+    }
   }
 
   #getDialogElementContent() {

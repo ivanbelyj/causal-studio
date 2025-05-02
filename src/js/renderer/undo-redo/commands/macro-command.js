@@ -5,6 +5,7 @@ export class MacroCommand {
   }
 
   #callAll(functions) {
+    console.log(this.executeCallbacks, this.undoCallbacks);
     functions.forEach((func) => func());
   }
 
@@ -18,7 +19,9 @@ export class MacroCommand {
 
   static fromCommands(...commands) {
     return new MacroCommand(
-      commands.map((cmd) => cmd.executeCallback),
+      commands.map((cmd) => {
+        return cmd.executeCallback;
+      }),
       commands.map((cmd) => cmd.undoCallback)
     );
   }

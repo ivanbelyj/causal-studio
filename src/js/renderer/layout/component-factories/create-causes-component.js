@@ -11,7 +11,8 @@ export function createCausesComponent(args, container) {
     causalView,
     this.api,
     this.undoRedoManager,
-    causesChangeManager
+    causesChangeManager,
+    args.dataManager
   );
   causesComponent.init();
 

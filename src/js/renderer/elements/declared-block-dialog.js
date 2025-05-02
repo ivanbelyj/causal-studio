@@ -8,33 +8,41 @@ export class DeclaredBlockDialog extends Dialog {
       closeButtonContent: "Cancel",
       continueButtonContent: "Declare Block",
       focusOnContinue: true,
-      mainContent: d3.create("div").html(`
-          <div class="input-item">
-            <label class="input-item__label">Declared Block Id</label>
-            <input
-              id="${modalId}-declared-block-input-id"
-              class="input-item text-input input-item__input" type="text"
-              placeholder="Declared Block Id"/>
-          </div> 
-      `),
-
-      // Todo: add convention select on block declaration
-      // <div class="input-item">
-      //   <label class="input-item__label">Block Convention</label>
-      //   <select id="${modalId}-block-convention-select" class="input-item__input">
-      //     ${[].map(x => `<option value="${x}">${x}</option>`).join(" ")}
-      //   </select>
-      // </div>
-      // 
-      // <div class="input-item">
-      //   <button class="button">Add Block Convention</button>
-      // </div>
     });
+
     this.declaredBlockInputId = `${modalId}-declared-block-input-id`;
     this.blockConventionSelectId = `${modalId}-block-convention-select`;
+    this.blockCausesConventionSelectId = `${modalId}-block-causes-convention-select`;
     this.onDeclareBlockClicked = onDeclareBlockClicked;
+    this.blockConventionsProvider = blockConventionsProvider;
 
     this.isCallbackSubscribed = false;
+  }
+
+  createMainContent() {
+    return d3.create("div").html(`
+      <div class="input-item">
+        <label class="input-item__label">Declared Block Id</label>
+        <input
+          id="${this.modalId}-declared-block-input-id"
+          class="input-item text-input input-item__input" type="text"
+          placeholder="Declared Block Id"/>
+      </div>
+
+      <div class="input-item">
+        <label class="input-item__label">Block Convention</label>
+        <select id="${this.modalId}-block-convention-select" class="input-item__input">
+          ${this.blockConventionsProvider.blockConventions.map(x => `<option value="${x.name}">${x.name}</option>`).join(" ")}
+        </select>
+      </div>
+
+      <div class="input-item">
+        <label class="input-item__label">Block Causes Convention</label>
+        <select id="${this.modalId}-block-causes-convention-select" class="input-item__input">
+          ${this.blockConventionsProvider.blockCausesConventions.map(x => `<option value="${x.name}">${x.name}</option>`).join(" ")}
+        </select>
+      </div>
+  `);
   }
 
   show({ blockNodePosX, blockNodePosY }) {
@@ -57,15 +65,19 @@ export class DeclaredBlockDialog extends Dialog {
     const declaredBlockId = d3
       .select(`#${this.declaredBlockInputId}`)
       .property("value");
-    // Todo:
-    // const blockConvention = d3
-    //   .select(`#${this.blockConventionSelectId}`)
-    //   .property("value");
+
+    const blockConvention = d3
+      .select(`#${this.blockConventionSelectId}`)
+      .property("value");
+
+    const blockCausesConvention = d3
+      .select(`#${this.blockCausesConventionSelectId}`)
+      .property("value");
 
     const data = {
       declaredBlockId,
-      blockConvention: "",
-      // blockConvention,
+      blockConvention,
+      blockCausesConvention,
       blockNodePosY: this.blockNodePosY,
       blockNodePosX: this.blockNodePosX,
     };

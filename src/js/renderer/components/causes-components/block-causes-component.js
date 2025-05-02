@@ -14,8 +14,7 @@ export class BlockCausesComponent extends BaseCausesComponent {
         undoRedoManager,
         causesChangeManager,
         blockConventionsProvider) {
-        super(selector, causalView, api, undoRedoManager, causesChangeManager);
-        this.blockConventionsProvider = blockConventionsProvider;
+        super(selector, causalView, api, undoRedoManager, causesChangeManager, blockConventionsProvider);
         this.declaredBlockDataProvider = new DeclaredBlockDataProvider(
             this.undoRedoManager,
             this.causesChangeManager);
@@ -69,10 +68,17 @@ export class BlockCausesComponent extends BaseCausesComponent {
         new SelectNodeElement(
             selection.append("div").node(),
             this.causalView,
+            this.blockConventionsProvider,
             (newCauseId) => {
                 this.declaredBlockDataProvider.changeBlockCause(
                     blockCauseName,
                     newCauseId);
+            },
+            ({ blockId, blockConsequenceName }) => {
+                this.declaredBlockDataProvider.changeBlockCause(
+                    blockCauseName,
+                    // TODO: update block reference mappings
+                    BlockUtils.createCauseIdByBlockConsequence(blockId, blockConsequenceName));
             }
         ).init(initialId);
     }

@@ -10,7 +10,8 @@ export function createWeightsComponent(args, container) {
     causalView,
     this.api,
     this.undoRedoManager,
-    causesChangeManager
+    causesChangeManager,
+    args.dataManager,
   );
   weightsComponent.init();
 }

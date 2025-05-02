@@ -78,7 +78,7 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
         this.#appendSelectItem({
             name: "Block Convention",
             inputId: "block-convention-input",
-            isReadonly: false,
+            isReadonly: true,
             propName: "convention",
             isInnerProp: true,
             optionValues: this.blockConventionsProvider.blockConventions.map(x => x.name),
@@ -135,6 +135,9 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             const select = inputItem
                 .append("select")
                 .attr("class", "input-item__input");
+            if (isReadonly) {
+                select.attr("disabled", true);
+            }
 
             for (const optionValue of optionValues) {
                 select.append("option")

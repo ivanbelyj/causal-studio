@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { SelectNodeElement } from "../../elements/select-node-element.js";
 import binImgSrc from "../../../../images/bin.svg";
+import BlockUtils from "../../common/block-utils.js";
 
 // CausesItem is a UI element representing causes expression.
 // It includes top (with type dropdown) and content that can include
@@ -17,6 +18,7 @@ export class CausesItem {
     isRoot,
     causalView,
     causesExpressionProvider,
+    blockConventionsProvider
   }) {
     this.selector = selector;
     this.component = d3.select(selector);
@@ -34,6 +36,8 @@ export class CausesItem {
     this.causesExpressionProvider = causesExpressionProvider;
     causesExpressionProvider.addEventListener("reset", this.reset.bind(this));
     causesExpressionProvider.addEventListener("mutated", this.reset.bind(this));
+
+    this.blockConventionsProvider = blockConventionsProvider;
   }
 
   // Resets causes item's provider with causes expression
@@ -186,10 +190,19 @@ export class CausesItem {
     new SelectNodeElement(
       this.content.append("div").node(),
       this.causalView,
+      this.blockConventionsProvider,
       (newCauseId) => {
         this.causesExpressionProvider.changeCauseId(
           this.causesExpressionProvider.nodeData,
           newCauseId
+        );
+      },
+      ({ blockId, blockConsequenceName, block }) => {
+        // Todo: rename blockConsequenceId to blockConsequenceName
+        this.causesExpressionProvider.changeCauseIdAndBlockConsequenceMapping(
+          this.causesExpressionProvider.nodeData,
+          block,
+          blockConsequenceName
         );
       }
     ).init(expr.edge.causeId);
@@ -247,6 +260,7 @@ export class CausesItem {
       isRoot: false, // Inner item can't be the root
       causalView: this.causalView,
       causesExpressionProvider,
+      blockConventionsProvider: this.blockConventionsProvider
     });
 
     return newItem;

@@ -67,7 +67,7 @@ export class CausalViewManager {
   }
 
   destroy() {
-    // Todo: implement fully
+    // Todo: implement unsubscription fully to support causal view recreation
     eventBus.off("causalModelSelected", this.#eventHandlers.causalModelSelected);
   }
 
@@ -105,11 +105,13 @@ export class CausalViewManager {
     blockNodePosY,
     declaredBlockId,
     blockConvention,
+    blockCausesConvention
   }) {
     const nodeData = {
       block: this.declareBlockHelper.createBlock({
         declaredBlockId,
         blockConvention,
+        blockCausesConvention
       }),
     };
 

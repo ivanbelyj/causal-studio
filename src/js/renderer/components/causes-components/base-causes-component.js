@@ -1,11 +1,12 @@
 import * as d3 from "d3";
 
 export class BaseCausesComponent {
-    constructor(selector, causalView, api, undoRedoManager, causesChangeManager) {
+    constructor(selector, causalView, api, undoRedoManager, causesChangeManager, blockConventionsProvider) {
         this.component = d3.select(selector);
         this.causalView = causalView;
         this.undoRedoManager = undoRedoManager;
         this.causesChangeManager = causesChangeManager;
+        this.blockConventionsProvider = blockConventionsProvider;
 
         api.onReset(
             function (event, data) {
