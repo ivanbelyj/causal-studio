@@ -1,7 +1,6 @@
 import { CausesItem } from "./causes-item.js";
-import { CausesExpressionProvider } from "../providers/causes-expression-provider.js";
 import { BaseCausesComponent } from "./base-causes-component.js";
-
+import { CausesExpressionProvider } from "../../data/providers/causes-expression-provider.js";
 
 export class CausesComponent extends BaseCausesComponent {
   shouldHandleReset(nodeData) {

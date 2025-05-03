@@ -1,7 +1,7 @@
 import BlockResolvingMapUtils from "../../common/block-resolving-map-utils";
-import { ProjectDataComponent } from "../convention-components/project-data-component";
 import { blockResolvingMapNodeType } from "../project-view/js-tree-data-utils";
-import { BlockResolvingMapDataProvider } from "../providers/block-resolving-map-data-provider";
+import { ProjectDataComponent } from "../project-view/project-data-component";
+import { BlockResolvingMapDataProvider } from "../../data/providers/block-resolving-map-data-provider";
 
 export class BlockResolvingMapComponent extends ProjectDataComponent {
     constructor(selector, api, undoRedoManager, causalBundleProvider) {

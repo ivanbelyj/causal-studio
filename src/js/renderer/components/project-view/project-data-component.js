@@ -1,4 +1,4 @@
-import { BaseComponent } from "./base-component";
+import { BaseComponent } from "../base/base-component";
 
 const eventBus = require("js-event-bus")();
 

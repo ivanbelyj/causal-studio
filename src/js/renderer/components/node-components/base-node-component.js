@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { BaseComponent } from "../convention-components/base-component";
+import { BaseComponent } from "../base/base-component";
 
 export class BaseNodeComponent extends BaseComponent {
     constructor(selector, causalView, api, undoRedoManager) {

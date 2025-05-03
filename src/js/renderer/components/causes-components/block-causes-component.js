@@ -1,7 +1,7 @@
 import { BaseCausesComponent } from "./base-causes-component";
 import { SelectNodeElement } from "../../elements/select-node-element";
-import { DeclaredBlockDataProvider } from "../providers/declared-block-data-provider";
 import BlockUtils from "../../common/block-utils";
+import { DeclaredBlockDataProvider } from "../../data/providers/declared-block-data-provider";
 
 const eventBus = require("js-event-bus")();
 

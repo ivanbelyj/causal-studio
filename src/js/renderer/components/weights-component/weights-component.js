@@ -1,27 +1,19 @@
 import * as d3 from "d3";
 import { SelectNodeElement } from "../../elements/select-node-element.js";
-import binSrc from "../../../../images/bin.svg";
-import { FactDataProvider } from "../providers/fact-data-provider.js";
 import BlockUtils from "../../common/block-utils.js";
+import { ListManager } from "../../elements/list-manager.js";
+import { FactDataProvider } from "../../data/providers/fact-data-provider.js";
 
-// Block is used as a part of a component
 export class WeightsComponent {
   constructor(selector, causalView, api, undoRedoManager, causesChangeManager, blockConventionsProvider) {
-    // Parent element
     this.component = d3.select(selector);
     this.causalView = causalView;
-
     this.causesChangeManager = causesChangeManager;
     this.blockConventionsProvider = blockConventionsProvider;
 
-    api.onReset(
-      function (event, data) {
-        this.resetProvider(null);
-      }.bind(this)
-    );
+    api.onReset(() => this.resetProvider(null));
 
     this.undoRedoManager = undoRedoManager;
-
     this.nodeDataProvider = new FactDataProvider(
       this.undoRedoManager,
       this.causesChangeManager
@@ -39,57 +31,36 @@ export class WeightsComponent {
 
     this.causalView.selectionManager.addEventListener(
       "singleNodeSelected",
-      function (event) {
-        this.resetProvider(event.nodeData);
-      }.bind(this)
+      (event) => this.resetProvider(event.nodeData)
     );
 
     this.causalView.selectionManager.addEventListener(
       "singleNodeNotSelected",
-      function (event) {
-        this.resetProvider(null);
-      }.bind(this)
+      () => this.resetProvider(null)
     );
-
-    // if (causalModelFact) this.reset(causalModelFact);
   }
 
   reset() {
     this.component.html("");
-
     const causalFact = this.nodeDataProvider.get()?.fact;
     if (!causalFact) return;
 
-    // this.causesChangeManager.reset(causalFact);
-
     this.appendAbstractFactIdInput();
 
-    // Button to add new items
-    const addButton = this.component
-      .append("button")
-      .attr("class", "button input-item")
-      .text("Add Weight Edge")
-      .on("click", () => this.nodeDataProvider.addNewWeightEdge());
+    this.listManager = new ListManager(this.component.node(), {
+      addButtonText: 'Add Weight Edge',
+      onAdd: () => this.nodeDataProvider.addNewWeightEdge(),
+      onRemove: (item) => this.nodeDataProvider.removeEdge(item),
+      renderItemTop: (container, weightEdge) => this.renderWeightItemTop(container, weightEdge),
+      renderItemContent: (container, weightEdge) => this.renderWeightItemContent(container, weightEdge)
+    });
 
-    this.resetItems();
+    this.listManager.init();
+    this.listManager.renderAll(this.getWeights());
   }
 
   getWeights() {
-    return this.nodeDataProvider.get()?.fact.weights;
-  }
-
-  // Content is a part of component that is changing
-  resetItems() {
-    if (this.itemsParent) {
-      this.itemsParent.remove();
-      this.itemsParent = null;
-    }
-
-    const weights = this.getWeights();
-    if (weights)
-      for (const weightEdge of weights) {
-        this.appendItem(weightEdge);
-      }
+    return this.nodeDataProvider.get()?.fact.weights || [];
   }
 
   appendAbstractFactIdInput() {
@@ -102,69 +73,42 @@ export class WeightsComponent {
       this.component.append("div").node(),
       this.causalView,
       this.blockConventionsProvider,
-      this.nodeDataProvider.changeAbstractFactId.bind(this.nodeDataProvider),
+      (newId) => this.nodeDataProvider.changeAbstractFactId(newId),
       ({ block, blockConsequenceName }) => {
         this.nodeDataProvider.changeAbstractFactId(
           BlockUtils.createCauseIdByBlockConsequence(block.id, blockConsequenceName),
-          { declaredBlock: block, blockConsequenceName })
+          { declaredBlock: block, blockConsequenceName }
+        );
       }
     ).init(this.nodeDataProvider.getFact().abstractFactId);
   }
 
-  appendItem(weightEdge) {
-    if (!this.itemsParent) this.itemsParent = this.component.append("div");
-
-    const item = this.itemsParent
-      .append("div")
-      .attr("class", "component__inner-item");
-
-    const itemTop = item
-      .append("div")
-      .attr("class", "component__inner-item-top");
-
-    const itemContent = item.append("div");
-
-    const weightInput = itemTop
+  renderWeightItemTop(container, weightEdge) {
+    d3.select(container)
       .append("input")
       .attr("type", "number")
       .attr("step", "1")
       .attr("class", "input-item text-input input-item__input")
       .attr("placeholder", "Weight")
-      .property("value", weightEdge.weight ?? "");
-
-    weightInput.on(
-      "change",
-      function (event) {
+      .property("value", weightEdge.weight ?? "")
+      .on("change", (event) => {
         const newWeight = parseFloat(d3.select(event.target).property("value"));
         this.nodeDataProvider.changeWeightEdgeWeight(weightEdge, newWeight);
-      }.bind(this)
-    );
+      });
+  }
 
-    itemTop
-      .append("img")
-      .attr("src", binSrc)
-      .attr("class", "component__remove-icon")
-      .style("padding-right", "0")
-      .on(
-        "click",
-        function (event) {
-          item.remove();
-          this.nodeDataProvider.removeEdge(weightEdge);
-        }.bind(this)
-      );
-
+  renderWeightItemContent(container, weightEdge) {
     new SelectNodeElement(
-      itemContent.append("div").node(),
+      d3.select(container).append("div").node(),
       this.causalView,
       this.blockConventionsProvider,
-      function (newId) {
-        this.nodeDataProvider.changeWeightEdgeCauseId(weightEdge, newId);
-      }.bind(this),
+      (newId) => this.nodeDataProvider.changeWeightEdgeCauseId(weightEdge, newId),
       ({ block, blockConsequenceName }) => {
         this.nodeDataProvider.changeWeightEdgeCauseId(
           weightEdge,
           BlockUtils.createCauseIdByBlockConsequence(block.id, blockConsequenceName),
-          { declaredBlock: block, blockConsequenceName })
+          { declaredBlock: block, blockConsequenceName }
+        );
       }
     ).init(weightEdge.causeId);
   }

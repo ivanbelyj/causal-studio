@@ -1,37 +1,27 @@
 import { blockCausesConventionNodeType } from "../project-view/js-tree-data-utils";
-import { CausesConventionDataProvider } from "../providers/causes-convention-data-provider";
-import { ProjectDataComponent } from "./project-data-component";
+import { BaseConventionsComponent } from "./base-conventions-component";
 
-export class CausesConventionsComponent extends ProjectDataComponent {
+export class CausesConventionsComponent extends BaseConventionsComponent {
     shouldRenderOnProjectViewNodeSelected(arg) {
         return arg.nodeData.type === blockCausesConventionNodeType
             && !arg.nodeData.isRoot;
     }
 
     render(data) {
-        this.appendTextInputItem({
-            name: "Causes Convention Name",
-            inputId: "convention-name",
-            propName: "name",
-            isInnerProp: false,
-            isReadonly: true
-        });
+        const current = data?.causes || [];
 
-        this.appendTextInputItem({
-            name: "Causes",
-            inputId: "causes",
-            propName: "causes",
-            isInnerProp: false,
-            useTextArea: true,
-            processValueBeforeSet: ProjectDataComponent.stringToArray
+        this.renderCommonInputs({
+            nameInputId: "causes-convention-name",
+            nameLabel: "Causes Convention Name",
+            itemLabel: "Cause",
+            initialItems: current,
+            onAdd: (newItem) => this.dataProvider.addCause(newItem),
+            onRemove: (itemToRemove) => this.dataProvider.removeCause(itemToRemove),
+            isReadonly: true
         });
     }
 
     getDataForProvider({ projectData, name }) {
         return projectData.blockCausesConventions.find(x => x.name === name);
-    }
-
-    createDataProvider() {
-        return new CausesConventionDataProvider(this.undoRedoManager);
     }
 }

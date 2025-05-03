@@ -1,37 +1,26 @@
 import { blockConventionNodeType } from "../project-view/js-tree-data-utils";
-import { BlockConventionDataProvider } from "../providers/block-convention-data-provider";
-import { ProjectDataComponent } from "./project-data-component";
+import { BaseConventionsComponent } from "./base-conventions-component";
 
-export class ConventionsComponent extends ProjectDataComponent {
+export class ConventionsComponent extends BaseConventionsComponent {
     shouldRenderOnProjectViewNodeSelected(arg) {
         return arg.nodeData.type === blockConventionNodeType
             && !arg.nodeData.isRoot;
     }
 
     render(data) {
-        this.appendTextInputItem({
-            name: "Convention Name",
-            inputId: "convention-name",
-            propName: "name",
-            isInnerProp: false,
-            isReadonly: true
-        });
+        const current = data?.consequences || [];
 
-        this.appendTextInputItem({
-            name: "Consequences",
-            inputId: "consequences",
-            propName: "consequences",
-            isInnerProp: false,
-            useTextArea: true,
-            processValueBeforeSet: ProjectDataComponent.stringToArray
+        this.renderCommonInputs({
+            nameInputId: "convention-name",
+            nameLabel: "Convention Name",
+            itemLabel: "Consequence",
+            initialItems: current,
+            onAdd: (newItem) => this.dataProvider.addConsequence(newItem),
+            onRemove: (itemToRemove) => this.dataProvider.removeConsequence(itemToRemove)
         });
     }
 
     getDataForProvider({ projectData, name }) {
         return projectData.blockConventions.find(x => x.name === name);
-    }
-
-    createDataProvider() {
-        return new BlockConventionDataProvider(this.undoRedoManager);
     }
 }

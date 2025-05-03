@@ -1,5 +1,4 @@
 import { CausalModelUtils } from "../../causal-view/causal-model-utils";
-import { CausalViewNodeUtils } from "../../causal-view/render/causal-view-node-utils";
 import BlockUtils from "../../common/block-utils";
 import { Command } from "../../undo-redo/commands/command";
 import { DataProvider } from "./data-provider";

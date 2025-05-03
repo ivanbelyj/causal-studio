@@ -62,6 +62,15 @@ export class DeclaredBlockDialog extends Dialog {
   }
 
   onDeclareButtonClick() {
+    if (!this.blockConventionsProvider.blockConventions.length) {
+      window.api.sendShowDialog("error", {
+        title: "Cannot declare block",
+        message: "Cannot declare block without block convention set. " +
+          "Please, create at least one block convention before declaring blocks"
+      });
+      return;
+    }
+
     const declaredBlockId = d3
       .select(`#${this.declaredBlockInputId}`)
       .property("value");

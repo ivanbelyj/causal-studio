@@ -1,11 +1,15 @@
 import * as d3 from "d3";
 import { SelectNodeElement } from "../../elements/select-node-element.js";
 import binImgSrc from "../../../../images/bin.svg";
-import BlockUtils from "../../common/block-utils.js";
 
-// CausesItem is a UI element representing causes expression.
-// It includes top (with type dropdown) and content that can include
-// another CausesItem inner elements
+// Todo: there can be used ListManager for list rendering,
+// but it's quite dangerous to refactor vanilla JS
+
+/**
+ * CausesItem is a UI element representing causes expression.
+ * It includes top (with type dropdown) and content that can include
+ * another CausesItem inner elements
+ */
 export class CausesItem {
   // There are some properties that don't change after reset. They are set in constructor.
   // Selector for item is constant (the item is always in the same place in DOM).

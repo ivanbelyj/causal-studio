@@ -5,6 +5,7 @@ const { ContextMenuManager } = require("./context-menu-manager.js");
 const { DataStore } = require("./data-management/data-store.js");
 const { SplashScreen } = require("../../splash/splash-screen.js");
 const path = require("path");
+const { IpcManager } = require("./ipc/ipc-manager.js");
 
 // Creates the browser window
 async function createWindow(appLocale) {
@@ -66,6 +67,8 @@ app.whenReady().then(async () => {
 
   const menuManager = new MenuManager(dataManager, mainWindow);
   menuManager.render();
+
+  const ipcManager = new IpcManager();
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the

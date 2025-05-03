@@ -1,6 +1,6 @@
-import { ProjectDataComponent } from "../convention-components/project-data-component";
+import { DataProvider } from "../../data/providers/data-provider";
+import { ProjectDataComponent } from "../project-view/project-data-component";
 import { causalModelNodeType } from "../project-view/js-tree-data-utils";
-import { DataProvider } from "../providers/data-provider";
 
 export class CausalModelSettingsComponent extends ProjectDataComponent {
     shouldRenderOnProjectViewNodeSelected(arg) {

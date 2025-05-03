@@ -6,6 +6,7 @@
  * https://www.electronjs.org/docs/latest/tutorial/sandbox
  */
 const { ipcRenderer, contextBridge, ipcMain } = require("electron");
+const { DIALOG } = require("../main/ipc/channels");
 
 contextBridge.exposeInMainWorld("api", {
   sendNodeEnter: () => send("node-enter"),
@@ -18,6 +19,8 @@ contextBridge.exposeInMainWorld("api", {
     send("send-component-active", componentData),
 
   sendIsUnsavedChanges: (data) => send("send-is-unsaved-changes", data),
+
+  sendShowDialog: (type, options) => send(DIALOG.SHOW, { type, options }),
 
   onCreateNode: (func) => on("create-node", func),
   onDeclareBlock: (func) => on("declare-block", func),

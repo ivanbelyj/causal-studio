@@ -1,9 +1,8 @@
 import { BaseNodeComponent } from "./base-node-component"
-import { DeclaredBlockDataProvider } from "../providers/declared-block-data-provider";
-import BlockUtils from "../../common/block-utils";
-import { BlockResolvingMapDataProvider } from "../providers/block-resolving-map-data-provider";
 import * as d3 from "d3";
 import BlockResolvingMapUtils from "../../common/block-resolving-map-utils";
+import { BlockResolvingMapDataProvider } from "../../data/providers/block-resolving-map-data-provider";
+import { DeclaredBlockDataProvider } from "../../data/providers/declared-block-data-provider";
 
 const eventBus = require("js-event-bus")();
 

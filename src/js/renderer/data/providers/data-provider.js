@@ -1,5 +1,4 @@
 import { ChangePropertyCommand } from "../../undo-redo/commands/change-property-command";
-import { Command } from "../../undo-redo/commands/command";
 
 // Todo: rename
 export class DataProvider extends EventTarget {
@@ -19,6 +18,14 @@ export class DataProvider extends EventTarget {
 
   _getFrozenOrNull(obj) {
     return obj ? Object.freeze({ ...obj }) : null;
+  }
+
+  getInner() {
+    throw new Error("Method 'getInner' must be implemented in subclasses.");
+  }
+
+  getInnerToMutate() {
+    throw new Error("Method 'getInnerToMutate' must be implemented in subclasses.");
   }
 
   get() {
