@@ -1,27 +1,35 @@
+import { BlockResolvingMapComponent } from "../../components/block-resolving-map/block-resolving-map-component";
 import { CausalModelSettingsComponent } from "../../components/causal-model-settings/causal-model-settings-component";
 import { CausesConventionsComponent } from "../../components/convention-components/causes-conventions-component";
 import { ConventionsComponent } from "../../components/convention-components/conventions-component";
 
 export function createInspectorComponent(args, container) {
-    Object.assign(this, args);
+    const { api, undoRedoManager } = args;
 
     const causesConventionsComponent = new CausesConventionsComponent(
         container.element,
-        this.api,
-        this.undoRedoManager
+        api,
+        undoRedoManager
     );
     causesConventionsComponent.init();
 
     const conventionsComponent = new ConventionsComponent(
         container.element,
-        this.api,
-        this.undoRedoManager
+        api,
+        undoRedoManager
     );
     conventionsComponent.init();
 
     const causalModelSettingsComponent = new CausalModelSettingsComponent(
         container.element,
-        this.api,
-        this.undoRedoManager);
+        api,
+        undoRedoManager);
     causalModelSettingsComponent.init();
+
+    const blockResolvingMapComponent = new BlockResolvingMapComponent(
+        container.element,
+        api,
+        undoRedoManager
+    );
+    blockResolvingMapComponent.init();
 }

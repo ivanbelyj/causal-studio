@@ -32,7 +32,16 @@ export class ProjectData {
     defaultMainModel ??= causalModels.length > 0 ? causalModels[0].name : null;
     blockCausesConventions ??= [];
     blockConventions ??= [];
-    blockResolvingMap ??= {}
+
+
+    blockResolvingMap ??= {};
+    if (!blockResolvingMap.modelNamesByConventionName) {
+      blockResolvingMap.modelNamesByConventionName = {};
+    }
+    if (!blockResolvingMap.modelNamesByDeclaredBlockId) {
+      blockResolvingMap.modelNamesByDeclaredBlockId = {};
+    }
+
     version ??= DataValidator.getLatestVersion();
     return new ProjectData({
       ...args,

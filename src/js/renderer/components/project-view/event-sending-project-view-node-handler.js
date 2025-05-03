@@ -28,8 +28,7 @@ export class EventSendingProjectViewNodeHandler {
       blockCausesConventionNodeType,
       blockConventionNodeType,
       blockResolvingMapNodeType,
-      causalModelNodeType].includes(node.data.type)
-      && !node.data.isRoot) {
+      causalModelNodeType].includes(node.data.type)) {
       eventBus.emit("projectViewNodeSelected", null, { node });
     }
   }

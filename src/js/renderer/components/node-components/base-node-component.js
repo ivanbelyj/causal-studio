@@ -18,10 +18,14 @@ export class BaseNodeComponent {
 
         this.nodeDataProvider = this.createNodeDataProvider();
 
-        this.nodeDataProvider.addEventListener("reset", () => this.reset());
-        this.nodeDataProvider.addEventListener("mutated", () => {
-            console.log("Data mutated", this.nodeDataProvider.get());
-            this.reset(this.nodeDataProvider.get());
+        this.setupResetByDataProviderEvents(this.nodeDataProvider);
+    }
+
+    setupResetByDataProviderEvents(dataProvider) {
+        dataProvider.addEventListener("reset", () => this.reset());
+        dataProvider.addEventListener("mutated", () => {
+            console.log("Data mutated", dataProvider.get());
+            this.reset(dataProvider.get());
         });
     }
 

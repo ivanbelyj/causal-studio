@@ -1,15 +1,30 @@
 import { BaseNodeComponent } from "./base-node-component"
 import { DeclaredBlockDataProvider } from "../providers/declared-block-data-provider";
 import BlockUtils from "../../common/block-utils";
+import { BlockResolvingMapDataProvider } from "../providers/block-resolving-map-data-provider";
+import * as d3 from "d3";
 
 const eventBus = require("js-event-bus")();
 
 export class DeclaredBlockComponent extends BaseNodeComponent {
     #lastRenderedBlock;
-    constructor(selector, causalView, api, undoRedoManager, blockConventionsProvider, causesChangeManager) {
+    constructor(selector, causalView, api, undoRedoManager, causalBundleProvider, causesChangeManager) {
         super(selector, causalView, api, undoRedoManager);
-        this.blockConventionsProvider = blockConventionsProvider;
+        this.causalBundleProvider = causalBundleProvider;
         this.causesChangeManager = causesChangeManager;
+
+        this.blockResolvingMapDataProvider = new BlockResolvingMapDataProvider(undoRedoManager);
+
+        eventBus.on("dataOpened", this.onDataOpened.bind(this));
+    }
+
+    init() {
+        super.init();
+        this.setupResetByDataProviderEvents(this.blockResolvingMapDataProvider);
+    }
+
+    onDataOpened({ projectData }) {
+        this.blockResolvingMapDataProvider.set(projectData);
     }
 
     renderNode(nodeData) {
@@ -44,17 +59,24 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
         }
     }
 
-    #getBlockCauseNames(causesConventionName) {
-        return BlockUtils.getBlockCauseNames(
-            this.blockConventionsProvider.blockCausesConventions,
-            causesConventionName
-        );
+    changeResolvedModel({ propertyName, newValue }) {
+        console.log(propertyName, newValue, this.blockResolvingMapDataProvider);
     }
 
-    #getBlockConsequenceNames(conventionName) {
-        return BlockUtils.getBlockConsequenceNames(
-            this.blockConventionsProvider.blockConventions,
-            conventionName
+    // Works for convention and causes convention switching
+    switchConvention(
+        referenceMapPropertyName,
+        { propertyName, newValue }) {
+        // We define custom input handling so changes weren't applied
+        // to the actual data. Apply them
+        this.nodeDataProvider.switchBlockReferences(
+            {
+                propertyName,
+                referenceMapPropertyName,
+                newValue,
+                oldReferenceMap: this.nodeDataProvider.getBlock()[referenceMapPropertyName],
+                newReferenceMap: {}
+            }
         );
     }
 
@@ -81,7 +103,7 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             isReadonly: true,
             propName: "convention",
             isInnerProp: true,
-            optionValues: this.blockConventionsProvider.blockConventions.map(x => x.name),
+            optionValues: this.causalBundleProvider.blockConventions.map(x => x.name),
             overrideInputHandling: this.switchConvention.bind(
                 this,
                 "blockConsequencesMap")
@@ -93,31 +115,69 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             isReadonly: false,
             propName: "causesConvention",
             isInnerProp: true,
-            optionValues: this.blockConventionsProvider.blockCausesConventions.map(x => x.name),
+            optionValues: this.causalBundleProvider.blockCausesConventions.map(x => x.name),
             overrideInputHandling: this.switchConvention.bind(
                 this,
                 "blockCausesMap")
         });
+
+        const causalModelNames = this.causalBundleProvider.causalModels.map(x => x.name);
+
+        const declaredBlockId = this.nodeDataProvider.getBlock().id;
+        const currentResolvedModelValue = this
+            .blockResolvingMapDataProvider
+            .getResolvingMap()
+            .modelNamesByDeclaredBlockId[declaredBlockId]
+            ?? null;
+        this.#appendSelectItem({
+            name: "Resolved Model",
+            inputId: "resolved-model-name-input",
+            isReadonly: false,
+            // Seems like browser handles 'null' for select option in some specific
+            // way, so we use empty string as a marker of 'dynamic' resolving
+            optionValues: ["", ...causalModelNames],
+            optionTexts: [this.#getDynamicOptionText(), ...causalModelNames],
+            overrideInputHandling: this.changeResolvedModel.bind(this)
+        }).on("input", (event) => {
+            // "" -> null
+            const selectedValue = d3.select(event.target).property("value") || null;
+            this.blockResolvingMapDataProvider.changeModelNameByDeclaredBlockId(
+                declaredBlockId,
+                selectedValue
+            );
+        }).property("value", currentResolvedModelValue);
+
         this.nodeDataProvider.addEventListener(
             "property-changed",
             this.handlePropertyChanged.bind(this));
     }
 
-    // Works for convention and causes convention switching
-    switchConvention(
-        referenceMapPropertyName,
-        { propertyName, newValue }) {
-        // We define custom input handling so changes weren't applied
-        // to the actual data. Apply them
-        this.nodeDataProvider.switchBlockReferences(
-            {
-                propertyName,
-                referenceMapPropertyName,
-                newValue,
-                oldReferenceMap: this.nodeDataProvider.getBlock()[referenceMapPropertyName],
-                newReferenceMap: {}
-            }
+    #getBlockCauseNames(causesConventionName) {
+        return BlockUtils.getBlockCauseNames(
+            this.causalBundleProvider.blockCausesConventions,
+            causesConventionName
         );
+    }
+
+    #getBlockConsequenceNames(conventionName) {
+        return BlockUtils.getBlockConsequenceNames(
+            this.causalBundleProvider.blockConventions,
+            conventionName
+        );
+    }
+
+    #getDynamicOptionText() {
+        if (this.causalBundleProvider.causalModels.length === 0) {
+            return "[Dynamic]";
+        }
+
+        const defaultMainModelName = this.causalBundleProvider.defaultMainModel;
+        if (defaultMainModelName === defaultMainModelName.toUpperCase()) {
+            return "[DYNAMIC]";
+        } else if (defaultMainModelName === defaultMainModelName.toLowerCase()) {
+            return "[dynamic]";
+        }
+        return "[Dynamic]";
     }
 
     #appendSelectItem(args) {
@@ -129,6 +189,7 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             propName,
             isInnerProp,
             optionValues,
+            optionTexts
         } = args;
 
         return this.appendInputItemCore(inputItem => {
@@ -139,10 +200,12 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
                 select.attr("disabled", true);
             }
 
-            for (const optionValue of optionValues) {
+            for (let i = 0; i < optionValues.length; i++) {
+                const optionValue = optionValues[i];
+                const optionText = (optionTexts && optionTexts[i]) ?? optionValue;
                 select.append("option")
                     .attr("value", optionValue)
-                    .text(optionValue);
+                    .text(optionText);
             }
 
             return select;

@@ -14,6 +14,8 @@ export class BaseComponent {
         this.dataProvider.addEventListener("mutated", () => {
             console.log("Data mutated", this.dataProvider.get());
         });
+
+        this.propNameToData = new Map();
     }
 
     init() {
@@ -110,9 +112,6 @@ export class BaseComponent {
 
         if (isReadonly) input.attr("readonly", true);
 
-        if (!this.propNameToData) {
-            this.propNameToData = new Map();
-        }
         if (propName)
             this.propNameToData.set(propName, { input, isInnerProp, processValueBeforeSet });
 

@@ -18,6 +18,14 @@ export class CausalBundleDataManager extends EventTarget {
     this.#initOpenDataListener(api);
   }
 
+  get causalModels() {
+    return this.projectData.causalModels ?? [];
+  }
+
+  get defaultMainModel() {
+    return this.projectData.defaultMainModel;
+  }
+
   get blockConventions() {
     return this.projectData.blockConventions ?? [];
   }

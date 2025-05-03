@@ -21,7 +21,7 @@ const defaultComponentFactoriesByType = {
   "Project View": createProjectView,
   Inspector: createInspectorComponent,
   "Fixation Results": createFixationResultsComponent,
-  "Probability Estimation Results": createProbabilityEstimationResultsComponent
+  "Probability Estimation Results": createProbabilityEstimationResultsComponent,
 };
 
 export class LayoutManager {
