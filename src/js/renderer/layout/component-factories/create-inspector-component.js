@@ -4,7 +4,7 @@ import { CausesConventionsComponent } from "../../components/convention-componen
 import { ConventionsComponent } from "../../components/convention-components/conventions-component";
 
 export function createInspectorComponent(args, container) {
-    const { api, undoRedoManager } = args;
+    const { api, undoRedoManager, dataManager } = args;
 
     const causesConventionsComponent = new CausesConventionsComponent(
         container.element,
@@ -29,7 +29,8 @@ export function createInspectorComponent(args, container) {
     const blockResolvingMapComponent = new BlockResolvingMapComponent(
         container.element,
         api,
-        undoRedoManager
+        undoRedoManager,
+        dataManager
     );
     blockResolvingMapComponent.init();
 }

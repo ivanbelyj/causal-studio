@@ -1,8 +1,14 @@
+import BlockResolvingMapUtils from "../../common/block-resolving-map-utils";
 import { ProjectDataComponent } from "../convention-components/project-data-component";
 import { blockResolvingMapNodeType } from "../project-view/js-tree-data-utils";
 import { BlockResolvingMapDataProvider } from "../providers/block-resolving-map-data-provider";
 
 export class BlockResolvingMapComponent extends ProjectDataComponent {
+    constructor(selector, api, undoRedoManager, causalBundleProvider) {
+        super(selector, api, undoRedoManager);
+        this.causalBundleProvider = causalBundleProvider;
+    }
+
     shouldRenderOnProjectViewNodeSelected(arg) {
         return arg.nodeData.type === blockResolvingMapNodeType
             && arg.nodeData.isRoot;
@@ -10,22 +16,18 @@ export class BlockResolvingMapComponent extends ProjectDataComponent {
 
     render(data) {
         for (const convention of this.projectData.blockConventions) {
-            // this.appendLabel(convention.name);
-            this.appendTextInputItem({
+            this.appendSelectItem({
                 name: convention.name,
-                inputId: "test",
+                inputId: `model-by-convention-input-${convention.name}`,
+                isReadonly: false,
                 propName: convention.name,
                 isInnerProp: true,
-                isReadonly: false
+                // Set to 'undefined' to make this property not serialized
+                // when it was not set
+                processValueBeforeSet: (newValue) => newValue || undefined,
+                ...BlockResolvingMapUtils.getBlockResolvingOptionValuesAndTexts(this.causalBundleProvider),
             });
         }
-    }
-
-    appendLabel(labelText) {
-        this.component
-            .append("label")
-            .attr("class", "input-item__label")
-            .text(labelText);
     }
 
     getDataForProvider({ projectData, name }) {

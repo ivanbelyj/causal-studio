@@ -19,26 +19,26 @@ export class NodeDataProvider extends DataProvider {
         return this._data;
     }
 
-    changeNonCauseProperty(
-        propertyName,
-        isInnerProp,
-        propertyValue,
-        causalViewToRender
-    ) {
-        // this.getInnerToMutate() result can change after selecting another node
-        const objToMutate = isInnerProp ? this.getInnerToMutate() : this.nodeData;
-        const oldValue = objToMutate[propertyName];
-        this.undoRedoManager.execute(
-            new ChangePropertyCommand(
-                (newVal) => {
-                    objToMutate[propertyName] = newVal;
-                    this._dispatchPropertyChanged(propertyName, propertyValue);
-                    causalViewToRender.render();
-                },
-                propertyValue,
-                oldValue,
-                propertyName
-            )
-        );
-    }
+    // changeNonCauseProperty(
+    //     propertyName,
+    //     isInnerProp,
+    //     propertyValue,
+    //     causalViewToRender
+    // ) {
+    //     // this.getInnerToMutate() result can change after selecting another node
+    //     const objToMutate = isInnerProp ? this.getInnerToMutate() : this.nodeData;
+    //     const oldValue = objToMutate[propertyName];
+    //     this.undoRedoManager.execute(
+    //         new ChangePropertyCommand(
+    //             (newVal) => {
+    //                 objToMutate[propertyName] = newVal;
+    //                 this._dispatchPropertyChanged(propertyName, propertyValue);
+    //                 causalViewToRender.render();
+    //             },
+    //             propertyValue,
+    //             oldValue,
+    //             propertyName
+    //         )
+    //     );
+    // }
 }

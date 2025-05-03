@@ -2,7 +2,7 @@ import { BaseNodeComponent } from "./base-node-component"
 import { FactDataProvider } from "../providers/fact-data-provider";
 
 export class NodeValueComponent extends BaseNodeComponent {
-  renderNode(nodeData) {
+  render(nodeData) {
     if (nodeData.fact) {
       this.#renderFactNode();
     } else {
@@ -14,7 +14,7 @@ export class NodeValueComponent extends BaseNodeComponent {
     return !!(nodeData?.fact);
   }
 
-  createNodeDataProvider() {
+  createDataProvider() {
     return new FactDataProvider(this.undoRedoManager, null);
   }
 
@@ -25,6 +25,7 @@ export class NodeValueComponent extends BaseNodeComponent {
       inputId: "node-title-input",
       dontShowLabel: true,
       isInnerProp: false,
+      shouldRenderCausalView: true
     });
     this.valueInput = this.appendTextInputItem({
       name: "Fact Value",
@@ -33,6 +34,7 @@ export class NodeValueComponent extends BaseNodeComponent {
       isReadonly: false,
       useTextArea: true,
       isInnerProp: true,
+      shouldRenderCausalView: true
     });
     this.idInput = this.appendTextInputItem({
       name: "Id",

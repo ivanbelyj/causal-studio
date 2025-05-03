@@ -51,7 +51,7 @@ class ContextMenuManager {
           },
         },
         {
-          label: "Remove Fact",
+          label: "Remove Node",
           visible: this.isNodeEntered,
           click: () => {
             this.isNodeEntered = false; // entered node is removed

@@ -3,6 +3,7 @@ import { DeclaredBlockDataProvider } from "../providers/declared-block-data-prov
 import BlockUtils from "../../common/block-utils";
 import { BlockResolvingMapDataProvider } from "../providers/block-resolving-map-data-provider";
 import * as d3 from "d3";
+import BlockResolvingMapUtils from "../../common/block-resolving-map-utils";
 
 const eventBus = require("js-event-bus")();
 
@@ -27,7 +28,7 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
         this.blockResolvingMapDataProvider.set(projectData);
     }
 
-    renderNode(nodeData) {
+    render(nodeData) {
         if (nodeData.block) {
             this.#lastRenderedBlock = nodeData.block;
             this.#renderBlockNode(nodeData.block);
@@ -40,8 +41,8 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
         return !!(nodeData?.block);
     }
 
-    createNodeDataProvider() {
-        return new DeclaredBlockDataProvider(this.undoRedoManager, this.causesChangeManager)
+    createDataProvider() {
+        return new DeclaredBlockDataProvider(this.undoRedoManager, this.causesChangeManager);
     }
 
     handlePropertyChanged({ propertyName, newValue: propertyValue }) {
@@ -69,12 +70,12 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
         { propertyName, newValue }) {
         // We define custom input handling so changes weren't applied
         // to the actual data. Apply them
-        this.nodeDataProvider.switchBlockReferences(
+        this.dataProvider.switchBlockReferences(
             {
                 propertyName,
                 referenceMapPropertyName,
                 newValue,
-                oldReferenceMap: this.nodeDataProvider.getBlock()[referenceMapPropertyName],
+                oldReferenceMap: this.dataProvider.getBlock()[referenceMapPropertyName],
                 newReferenceMap: {}
             }
         );
@@ -87,6 +88,7 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             inputId: "node-title-input",
             dontShowLabel: true,
             isInnerProp: false,
+            shouldRenderCausalView: true
         });
 
         this.appendTextInputItem({
@@ -97,7 +99,7 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             isInnerProp: true,
         });
 
-        this.#appendSelectItem({
+        this.appendSelectItem({
             name: "Block Convention",
             inputId: "block-convention-input",
             isReadonly: true,
@@ -109,7 +111,7 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
                 "blockConsequencesMap")
         });
 
-        this.#appendSelectItem({
+        this.appendSelectItem({
             name: "Block Causes Convention",
             inputId: "block-causes-convention-input",
             isReadonly: false,
@@ -121,22 +123,17 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
                 "blockCausesMap")
         });
 
-        const causalModelNames = this.causalBundleProvider.causalModels.map(x => x.name);
-
-        const declaredBlockId = this.nodeDataProvider.getBlock().id;
+        const declaredBlockId = this.dataProvider.getBlock().id;
         const currentResolvedModelValue = this
             .blockResolvingMapDataProvider
             .getResolvingMap()
             .modelNamesByDeclaredBlockId[declaredBlockId]
             ?? null;
-        this.#appendSelectItem({
+        this.appendSelectItem({
             name: "Resolved Model",
             inputId: "resolved-model-name-input",
             isReadonly: false,
-            // Seems like browser handles 'null' for select option in some specific
-            // way, so we use empty string as a marker of 'dynamic' resolving
-            optionValues: ["", ...causalModelNames],
-            optionTexts: [this.#getDynamicOptionText(), ...causalModelNames],
+            ...BlockResolvingMapUtils.getBlockResolvingOptionValuesAndTexts(this.causalBundleProvider),
             overrideInputHandling: this.changeResolvedModel.bind(this)
         }).on("input", (event) => {
             // "" -> null
@@ -147,68 +144,8 @@ export class DeclaredBlockComponent extends BaseNodeComponent {
             );
         }).property("value", currentResolvedModelValue);
 
-        this.nodeDataProvider.addEventListener(
+        this.dataProvider.addEventListener(
             "property-changed",
             this.handlePropertyChanged.bind(this));
-    }
-
-    #getBlockCauseNames(causesConventionName) {
-        return BlockUtils.getBlockCauseNames(
-            this.causalBundleProvider.blockCausesConventions,
-            causesConventionName
-        );
-    }
-
-    #getBlockConsequenceNames(conventionName) {
-        return BlockUtils.getBlockConsequenceNames(
-            this.causalBundleProvider.blockConventions,
-            conventionName
-        );
-    }
-
-    #getDynamicOptionText() {
-        if (this.causalBundleProvider.causalModels.length === 0) {
-            return "[Dynamic]";
-        }
-
-        const defaultMainModelName = this.causalBundleProvider.defaultMainModel;
-        if (defaultMainModelName === defaultMainModelName.toUpperCase()) {
-            return "[DYNAMIC]";
-        } else if (defaultMainModelName === defaultMainModelName.toLowerCase()) {
-            return "[dynamic]";
-        }
-        return "[Dynamic]";
-    }
-
-    #appendSelectItem(args) {
-        const {
-            name,
-            inputId,
-            isReadonly,
-            dontShowLabel,
-            propName,
-            isInnerProp,
-            optionValues,
-            optionTexts
-        } = args;
-
-        return this.appendInputItemCore(inputItem => {
-            const select = inputItem
-                .append("select")
-                .attr("class", "input-item__input");
-            if (isReadonly) {
-                select.attr("disabled", true);
-            }
-
-            for (let i = 0; i < optionValues.length; i++) {
-                const optionValue = optionValues[i];
-                const optionText = (optionTexts && optionTexts[i]) ?? optionValue;
-                select.append("option")
-                    .attr("value", optionValue)
-                    .text(optionText);
-            }
-
-            return select;
-        }, args);
     }
 }

@@ -115,12 +115,10 @@ export class FixationResultsComponent {
 
     renderModelInstance(container, instanceId, instanceData) {
         const accordion = container.append("details")
-            .attr("class", "instance-accordion")
+            .attr("class", "model-accordion")
             .property("open", true);
 
         const summary = this.renderAccordionHeader(accordion, instanceData.modelInstance.modelName, instanceId);
-
-        // Добавляем кнопку копирования в заголовок
         this.addCopyButtonToHeader(summary, instanceData);
 
         const content = accordion.append("div")
@@ -142,8 +140,14 @@ export class FixationResultsComponent {
             .style("font-weight", "bold")
             .style("outline", "none")
             .style("display", "flex")
-            .style("justify-content", "space-between")
             .style("align-items", "center");
+
+        // Add arrow indicator
+        summary.append("span")
+            .attr("class", "accordion-arrow")
+            .style("margin-right", "0.5em")
+            // .style("transition", "transform 0.2s")
+            .text("▼");
 
         const titleContainer = summary.append("div")
             .style("flex", "1");
@@ -156,6 +160,13 @@ export class FixationResultsComponent {
             .style("font-weight", "normal")
             .style("opacity", "0.7")
             .text(instanceId);
+
+        // Update arrow rotation when accordion is toggled
+        accordion.on("toggle", function () {
+            const isOpen = this.open;
+            d3.select(this).select(".accordion-arrow")
+                .style("transform", isOpen ? "rotate(0deg)" : "rotate(-90deg)");
+        });
 
         return summary;
     }
@@ -172,25 +183,6 @@ export class FixationResultsComponent {
                 event.stopPropagation();
                 this.copyInstanceFactValues(instanceData, header.node());
             });
-    }
-
-    copyInstanceFactValues(instanceData, targetElement) {
-        const occurredFacts = instanceData.occurredFacts || [];
-        const factValues = occurredFacts.map(fact => {
-            try {
-                return typeof fact.factValue === 'string'
-                    ? JSON.parse(fact.factValue)
-                    : fact.factValue;
-            } catch {
-                return fact.factValue;
-            }
-        });
-
-        const jsonString = JSON.stringify(factValues, null, 2);
-
-        navigator.clipboard.writeText(jsonString)
-            .then(() => this.showCopyNotification(targetElement, "Occurred facts copied!"))
-            .catch(err => console.error("Failed to copy:", err));
     }
 
     renderFactsSection(container, title, facts, isExpanded) {
@@ -215,12 +207,14 @@ export class FixationResultsComponent {
             .style("margin-bottom", "0.5em")
             .on("click", () => this.toggleSectionVisibility(header, content));
 
-        const arrow = header.append("span")
+        // Add arrow indicator with consistent styling
+        header.append("span")
             .style("margin-right", "0.5em")
-            .style("font-family", "monospace")
+            // .style("transition", "transform 0.2s")
             .style("width", "1em")
             .style("text-align", "center")
-            .text(isExpanded ? "▼" : "▶");
+            .style("transform", isExpanded ? "rotate(0deg)" : "rotate(-90deg)")
+            .text("▼");
 
         header.append("h4")
             .text(title)
@@ -242,7 +236,8 @@ export class FixationResultsComponent {
     toggleSectionVisibility(header, content) {
         const isHidden = content.style("display") === "none";
         content.style("display", isHidden ? "grid" : "none");
-        header.select("span").text(isHidden ? "▼" : "▶");
+        header.select("span")
+            .style("transform", isHidden ? "rotate(0deg)" : "rotate(-90deg)");
         this.updateResponsiveLayout(this.currentComponentWidth);
     }
 
@@ -296,6 +291,25 @@ export class FixationResultsComponent {
                 this.copyToClipboard(fullText, event.target);
             })
             .text(displayText);
+    }
+
+    copyInstanceFactValues(instanceData, targetElement) {
+        const occurredFacts = instanceData.occurredFacts || [];
+        const factValues = occurredFacts.map(fact => {
+            try {
+                return typeof fact.factValue === 'string'
+                    ? JSON.parse(fact.factValue)
+                    : fact.factValue;
+            } catch {
+                return fact.factValue;
+            }
+        });
+
+        const jsonString = JSON.stringify(factValues, null, 2);
+
+        navigator.clipboard.writeText(jsonString)
+            .then(() => this.showCopyNotification(targetElement, "Occurred facts copied!"))
+            .catch(err => console.error("Failed to copy:", err));
     }
 
     truncateId(id) {

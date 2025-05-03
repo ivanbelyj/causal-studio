@@ -120,7 +120,7 @@ export class ProbabilityEstimationResultsComponent {
     renderProbabilitiesSection(probabilitiesData) {
         const section = this.component.append("div")
             .attr("class", "component__inner-item")
-            .style("margin-bottom", "1em"); // Добавлен отступ между секциями
+            .style("margin-bottom", "1em");
 
         section.append("h3")
             .text("Fact Probabilities by Model")

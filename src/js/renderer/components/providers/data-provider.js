@@ -48,7 +48,8 @@ export class DataProvider extends EventTarget {
   changeProperty(
     propertyName,
     isInnerProp,
-    propertyValue
+    propertyValue,
+    causalViewToRender
   ) {
     // this.getInnerToMutate() result can change after selecting another node
     const objToMutate = isInnerProp ? this.getInnerToMutate() : this._data;
@@ -58,6 +59,9 @@ export class DataProvider extends EventTarget {
         (newVal) => {
           objToMutate[propertyName] = newVal;
           this._dispatchPropertyChanged(propertyName, propertyValue);
+          if (causalViewToRender) {
+            causalViewToRender.render();
+          }
         },
         propertyValue,
         oldValue,
