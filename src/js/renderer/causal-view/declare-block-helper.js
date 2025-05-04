@@ -4,12 +4,8 @@ export class DeclareBlockHelper {
       id: declaredBlockId,
       convention: blockConvention,
       causesConvention: blockCausesConvention,
-      blockCausesMap: {
-
-      },
-      blockConsequencesMap: {
-
-      },
+      blockCausesMap: {},
+      blockConsequencesMap: {},
     };
   }
 }

@@ -41,6 +41,16 @@ class ContextMenuManager {
           },
         },
         {
+          label: "Create Fact With Name",
+          visible: this.isCausalViewEntered,
+          click: (event) => {
+            this.window.webContents.send("create-fact-with-name", {
+              x: parameters.x,
+              y: parameters.y,
+            });
+          },
+        },
+        {
           label: "Declare Block",
           visible: this.isCausalViewEntered,
           click: (event) => {

@@ -49,9 +49,9 @@ export class NodesCreateRemoveManager {
     );
   }
 
-  createNodeData() {
+  createNodeData(factId) {
     const newFact = CausalModelUtils.createNewFactWithFactor(this.getNewFactValue());
-    newFact.id = crypto.randomUUID();
+    newFact.id = factId ?? crypto.randomUUID();
     return { fact: newFact };
   }
 

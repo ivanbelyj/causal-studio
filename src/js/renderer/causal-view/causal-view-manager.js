@@ -9,6 +9,7 @@ import { DeclaredBlockDialog } from "../elements/declared-block-dialog.js";
 import { DeclareBlockHelper } from "./declare-block-helper.js";
 import { CausalViewDataUtils } from "./causal-view-data-utils.js";
 import { CausalBundleDataManager } from "../data/causal-bundle-data-manager.js";
+import { PromptDialog } from "../elements/prompt-dialog.js";
 
 const eventBus = require("js-event-bus")();
 
@@ -78,11 +79,41 @@ export class CausalViewManager {
 
   #initDialogs() {
     this.declaredBlockDialog = new DeclaredBlockDialog(
-      "declared-block-modal",
-      this.onDeclareBlockClicked.bind(this),
-      this.dataManager
+      {
+        modalId: "declared-block-modal",
+        onDeclareBlockClicked: this.onDeclareBlockClicked.bind(this),
+        blockConventionsProvider: this.dataManager,
+        isNodeIdUsedInCurrentCausalModel: (nodeId) => {
+          // Apply unsaved changes to use latest data in validation
+          this.dataManager.applyUnsavedChanges();
+          return this.dataManager.isNodeIdUsedInCurrentCausalModel(nodeId);
+        }
+      }
     );
     this.declaredBlockDialog.init();
+
+    this.createFactWithNameDialog = new PromptDialog(`create-fact-with-name-dialog`, {
+      title: "Create Fact",
+      continueButtonContent: "Create Fact",
+      closeButtonContent: "Cancel",
+      inputPlaceholder: "Enter new fact id",
+      onContinueClicked: this.onCreateFactWithNameClicked.bind(this),
+      validatePrompt: this.validateNewFactName.bind(this)
+    });
+    this.createFactWithNameDialog.init();
+  }
+
+  validateNewFactName(value) {
+    // Apply unsaved changes to use latest data in validation
+    this.dataManager.applyUnsavedChanges();
+    if (this.dataManager.isNodeIdUsedInCurrentCausalModel(value)) {
+      return {
+        isValid: false,
+        message: "This id is already used in the current causal model. " +
+          "Please, choose another value."
+      }
+    }
+    return { isValid: true };
   }
 
   onCausalModelSelected({ causalModelName }) {
@@ -124,11 +155,30 @@ export class CausalViewManager {
     );
   }
 
+  onCreateFactWithNameClicked(newFactId) {
+    const nodeData = this.nodesCreateRemoveManager.createNodeData(newFactId);
+
+    this.undoRedoManager.execute(
+      this.nodesCreateRemoveManager.getCreateNodeCommand(
+        // Were set in this.api.onCreateFactWithName listener
+        this.nodePosX,
+        this.nodePosY,
+        nodeData
+      )
+    );
+  }
+
   #initNodesApiCallbacks() {
     this.api.onCreateNode((event, data) => {
       this.undoRedoManager.execute(
         this.nodesCreateRemoveManager.getCreateNodeCommand(data.x, data.y)
       );
+    });
+    this.api.onCreateFactWithName((event, data) => {
+      // Set to use when "Create Fact" will be clicked
+      this.nodePosX = data.x;
+      this.nodePosY = data.y;
+      this.createFactWithNameDialog.show();
     });
     this.api.onDeclareBlock((event, data) => {
       this.declaredBlockDialog.show({

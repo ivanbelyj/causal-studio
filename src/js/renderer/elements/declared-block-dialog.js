@@ -2,7 +2,11 @@ import * as d3 from "d3";
 import { Dialog } from "./dialog";
 
 export class DeclaredBlockDialog extends Dialog {
-  constructor(modalId, onDeclareBlockClicked, blockConventionsProvider) {
+  constructor({
+    modalId,
+    onDeclareBlockClicked,
+    blockConventionsProvider,
+    isNodeIdUsedInCurrentCausalModel }) {
     super(modalId, {
       title: "Declare Block",
       closeButtonContent: "Cancel",
@@ -15,6 +19,7 @@ export class DeclaredBlockDialog extends Dialog {
     this.blockCausesConventionSelectId = `${modalId}-block-causes-convention-select`;
     this.onDeclareBlockClicked = onDeclareBlockClicked;
     this.blockConventionsProvider = blockConventionsProvider;
+    this.isNodeIdUsedInCurrentCausalModel = isNodeIdUsedInCurrentCausalModel;
 
     this.isCallbackSubscribed = false;
   }
@@ -54,26 +59,39 @@ export class DeclaredBlockDialog extends Dialog {
 
     if (!this.isCallbackSubscribed) {
       d3.select(`#${this.continueButtonId}`).on("click", () => {
-        this.onDeclareButtonClick();
-        this.close();
+        if (this.onDeclareButtonClick()) {
+          this.close();
+        }
       });
       this.isCallbackSubscribed = true;
     }
   }
 
+  /**
+   * @returns true if the dialog should be closed
+   */
   onDeclareButtonClick() {
     if (!this.blockConventionsProvider.blockConventions.length) {
       window.api.sendShowDialog("error", {
         title: "Cannot declare block",
         message: "Cannot declare block without block convention set. " +
-          "Please, create at least one block convention before declaring blocks"
+          "Please, create at least one block convention before declaring blocks."
       });
-      return;
+      return true;
     }
 
     const declaredBlockId = d3
       .select(`#${this.declaredBlockInputId}`)
       .property("value");
+
+    if (this.isNodeIdUsedInCurrentCausalModel(declaredBlockId)) {
+      window.api.sendShowDialog("error", {
+        title: "Cannot declare block",
+        message: "This id is already used in the current causal model. " +
+          "Please, choose another value."
+      });
+      return false;
+    }
 
     const blockConvention = d3
       .select(`#${this.blockConventionSelectId}`)
@@ -92,6 +110,8 @@ export class DeclaredBlockDialog extends Dialog {
     };
 
     this.onDeclareBlockClicked(data);
+
+    return true;
   }
 
   #resetDeclaredBlockInput() {

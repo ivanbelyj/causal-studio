@@ -1,7 +1,6 @@
 import * as d3 from "d3";
 import { Dialog } from "./dialog.js";
 
-// Warning: ai-generated class
 export class PromptDialog extends Dialog {
     constructor(
         modalId,
@@ -11,6 +10,7 @@ export class PromptDialog extends Dialog {
             closeButtonContent = "Close",
             inputPlaceholder = "Enter value",
             onContinueClicked,
+            validatePrompt,
         }
     ) {
         const mainContent = d3.create("div").classed("input-item", true);
@@ -31,6 +31,7 @@ export class PromptDialog extends Dialog {
 
         this.modalId = modalId;
         this.onContinueClicked = onContinueClicked;
+        this.validatePrompt = validatePrompt;
         this.continueButtonId = `${modalId}-continue-button-id`;
         this.inputId = `${modalId}-input-id`;
 
@@ -41,12 +42,18 @@ export class PromptDialog extends Dialog {
         super.init();
 
         d3.select(`#${this.continueButtonId}`).on("click", () => {
-            const inputValue = d3.select(`#${this.inputId}`).property("value");
-            if (inputValue && inputValue.trim() !== "") {
+            const inputValue = d3.select(`#${this.inputId}`).property("value").trim();
+            const validationResult = this.validatePrompt?.(inputValue);
+            const isInputValid = validationResult?.isValid ?? true;
+            if (inputValue && isInputValid) {
                 this.onContinueClicked(inputValue.trim());
                 this.close();
             } else {
-                alert("Please enter a valid value.");
+                window.api.sendShowDialog("error", {
+                    title: "Invalid input",
+                    message: validationResult?.message
+                        ?? "Please enter a valid value."
+                });
             }
         });
     }

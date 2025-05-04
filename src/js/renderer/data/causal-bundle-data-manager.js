@@ -38,6 +38,8 @@ export class CausalBundleDataManager extends EventTarget {
     return this.projectData.blockCausesConventions ?? [];
   }
 
+  //#region Current causal model
+
   /**
    * Current CausalViewDataManager is used for getting data
    * of the currently editing causal view
@@ -52,8 +54,18 @@ export class CausalBundleDataManager extends EventTarget {
   }
 
   getCurrentCausalModelFactValueTemplate() {
-    return this.#getCausalModelByName(this.currentCausalViewDataManager.causalModelName)
-      .factValueTemplate;
+    return this.#getCurrentCausalModel().factValueTemplate;
+  }
+
+  isNodeIdUsedInCurrentCausalModel(nodeId) {
+    const currentCausalModel = this.#getCurrentCausalModel();
+    return currentCausalModel.facts.some(x => x.id === nodeId)
+      || currentCausalModel.declaredBlocks.some(x => x.id === nodeId);
+  }
+  //#endregion
+
+  #getCurrentCausalModel() {
+    return this.#getCausalModelByName(this.currentCausalViewDataManager.causalModelName);
   }
 
   #getCausalModelByName(causalModelName) {
