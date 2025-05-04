@@ -17,7 +17,6 @@ export class CausesConventionsComponent extends BaseConventionsComponent {
             initialItems: current,
             onAdd: (newItem) => this.dataProvider.addCause(newItem),
             onRemove: (itemToRemove) => this.dataProvider.removeCause(itemToRemove),
-            isReadonly: true
         });
     }
 

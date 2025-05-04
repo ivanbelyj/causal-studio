@@ -5,19 +5,52 @@ import * as d3 from "d3";
 
 export class BaseConventionsComponent extends ProjectDataComponent {
     setupList(config) {
-        this.listManager = new ListManager(this.component.append("div").node(), {
-            addButtonText: config.addButtonText,
-            deleteIcon: config.deleteIcon,
-            createNewItem: config.createNewItem,
-            onAdd: config.onAdd,
-            onRemove: config.onRemove,
-            renderItemTop: config.renderItemTop,
-            renderItemContent: config.renderItemContent,
-        });
+        const listConfig = { ...config };
+
+        if (!config.isReadonly) {
+            listConfig.customAddForm = {
+                renderForm: (formElement) => {
+                    const formGroup = d3.select(formElement)
+                        .style("display", "flex")
+                        .classed("input-item", true);
+
+                    const input = formGroup.append("input")
+                        .attr("type", "text")
+                        .attr("class", "text-input input-item__input")
+                        .attr("placeholder", config.inputPlaceholder || 'Enter value')
+                        .style("border-top-right-radius", "0")
+                        .style("border-bottom-right-radius", "0")
+                        .style("margin-right", "-1px")
+                        .on("keypress", (event) => {
+                            if (event.key === "Enter") {
+                                this.handleAddItem(input.node(), config.onAdd);
+                            }
+                        });
+
+                    formGroup.append("button")
+                        .attr("class", "button")
+                        .style("border-top-left-radius", "0")
+                        .style("border-bottom-left-radius", "0")
+                        .style("padding", "0.5em 0.75em")
+                        .text("+")
+                        .on("click", () => this.handleAddItem(input.node(), config.onAdd));
+                }
+            };
+        }
+
+        this.listManager = new ListManager(this.component.append("div").node(), listConfig);
         this.listManager.init();
 
         if (config.initialItems) {
             this.listManager.renderAll(config.initialItems);
+        }
+    }
+
+    handleAddItem(inputElement, onAddCallback) {
+        const value = inputElement.value.trim();
+        if (value) {
+            onAddCallback(value);
+            inputElement.value = '';
         }
     }
 
@@ -32,7 +65,7 @@ export class BaseConventionsComponent extends ProjectDataComponent {
             inputId: nameInputId,
             propName: "name",
             isInnerProp: false,
-            isReadonly: false
+            isReadonly: isReadonly
         });
 
         this.setupList({
@@ -49,6 +82,9 @@ export class BaseConventionsComponent extends ProjectDataComponent {
                     .property('value', item);
             },
             initialItems: initialItems,
+            isReadonly: isReadonly,
+            inputPlaceholder: `Enter ${itemLabel.toLowerCase()}`,
+            allowRemove: !isReadonly
         });
     }
 

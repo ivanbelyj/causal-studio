@@ -6,6 +6,7 @@ export class ListManager {
         this.component = d3.select(selector);
         this.config = config;
         this.itemsParent = null;
+        this.customAddFormElement = null;
     }
 
     init() {
@@ -14,14 +15,32 @@ export class ListManager {
     }
 
     renderAddButton() {
-        this.component.append("button")
-            .attr("class", "button input-item")
-            .text(this.config.addButtonText || "Add Item")
-            .on("click", () => this.addNewItem());
+        const addButtonContainer = this.component.append("div")
+            .attr("class", "add-item-container");
+
+        if (this.config.customAddForm) {
+            this.renderCustomAddForm(addButtonContainer);
+        } else if (this.config.addButtonText) {
+            addButtonContainer.append("button")
+                .attr("class", "button input-item")
+                .text(this.config.addButtonText)
+                .on("click", () => this.addNewItem());
+        }
     }
 
-    addNewItem() {
-        this.config.onAdd();
+    renderCustomAddForm(container) {
+        const formContainer = container.append("div")
+            .attr("class", "custom-add-form");
+
+        if (this.config.customAddForm.renderForm) {
+            this.config.customAddForm.renderForm(formContainer.node());
+        }
+
+        this.customAddFormElement = formContainer;
+    }
+
+    addNewItem(value) {
+        this.config.onAdd(value);
     }
 
     renderItem(item) {
@@ -71,5 +90,9 @@ export class ListManager {
         } else {
             this.itemsParent = this.component.append("div");
         }
+    }
+
+    getCustomAddFormElement() {
+        return this.customAddFormElement ? this.customAddFormElement.node() : null;
     }
 }
