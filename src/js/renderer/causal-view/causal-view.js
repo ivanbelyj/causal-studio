@@ -24,8 +24,6 @@ export class CausalView extends EventTarget {
   undoRedoManager;
   selectionManager;
 
-  // Todo: handle the case when causal view component is hidden
-
   constructor(undoRedoManager) {
     super();
     this.undoRedoManager = undoRedoManager;
@@ -75,6 +73,8 @@ export class CausalView extends EventTarget {
   }
 
   onMouseEnter(event, nodeSelection) {
+    if (this.shouldIgnoreMouseEvent(event, nodeSelection)) return;
+
     const nodeEnterEvent = new Event("nodeEnter");
     nodeEnterEvent.enterEvent = event;
     nodeEnterEvent.nodeSelection = nodeSelection;
@@ -82,10 +82,18 @@ export class CausalView extends EventTarget {
   }
 
   onMouseLeave(event, nodeSelection) {
+    if (this.shouldIgnoreMouseEvent(event, nodeSelection)) return;
+
     const nodeLeaveEvent = new Event("nodeLeave");
     nodeLeaveEvent.enterEvent = event;
     nodeLeaveEvent.nodeSelection = nodeSelection;
     this.dispatchEvent(nodeLeaveEvent);
+  }
+
+  shouldIgnoreMouseEvent(event, nodeSelection) {
+    // Ignore mouse events of external fact nodes
+    // to avoid display "Remove node" in the main process
+    return nodeSelection.data.isExternal;
   }
 
   onZoom() {
@@ -114,6 +122,7 @@ export class CausalView extends EventTarget {
   render() {
     this.nodeRenderer.renderNodes();
     this.edgeRenderer.renderEdges();
+    this.selectionManager.render();
   }
 
   updateEdges() {
@@ -129,6 +138,9 @@ export class CausalView extends EventTarget {
     this.viewRenderer.reset();
 
     this.render();
+
+    // Positions are set for the nodes after render
+    this.graphManager.ensureNodeDataPositionsSet(nodesData);
   }
 
   #ensureNodesDataExist(nodesData) {
@@ -136,7 +148,7 @@ export class CausalView extends EventTarget {
       nodesData = this.graphManager.getNodesData();
       if (!nodesData) {
         console.error(
-          "Cannot reset empty causa-view-structure with",
+          "Cannot reset empty causal view with",
           nodesData
         );
       }
@@ -172,8 +184,8 @@ export class CausalView extends EventTarget {
     this.graphManager.resetGraph(nodesData);
   }
 
-  addNodeWithData(nodeData) {
-    return this.graphManager.addNodeWithData(nodeData);
+  setNodeWithData(nodeData) {
+    return this.graphManager.setNodeWithData(nodeData);
   }
 
   removeNode(nodeId) {

@@ -34,7 +34,7 @@ export class CausalModelUtils {
   }
 
   static getCausesIdsUnique(nodeData) {
-    let idsAll;
+    let idsAll = [];
     if (nodeData.fact) {
       idsAll = CausalModelUtils.#getCauseIdsForFact(nodeData.fact);
     }

@@ -112,7 +112,21 @@ export class NodeRenderer {
 
           this.#applyNodeStyles(enterNodesSelection);
 
-          enterNodesSelection.append("text");
+          // Main text
+          enterNodesSelection
+            .append("text")
+            .attr("class", "node-main-text");
+
+          enterNodesSelection
+            .append("text")
+            .attr("class", "node-caption-text")
+            .attr("font-family", "sans-serif")
+            .attr("font-weight", "bold")
+            .attr("fill", "var(--color)")
+            .attr("transform", `translate(0, -8)`);
+
+          enterNodesSelection
+            .append("title");
 
           this.onEnterNodesSelection(enterNodesSelection);
         }.bind(this),
@@ -133,20 +147,22 @@ export class NodeRenderer {
       .attr("width", this.nodeWidth)
       .attr("height", this.nodeHeight)
       .attr("rx", 5)
-      .attr("ry", 5)
-      .each(function (n) {
-        var nodeRect = d3.select(this);
-
-        NodeRenderer.applyNodeStrokeAndFill(n, nodeRect)
-      });
+      .attr("ry", 5);
   }
 
-  // I don't know what exactly d3 object is it, so let it be 'n'
   static applyNodeStrokeAndFill(n, nodeRect) {
-    if (n.data.fact) {
+    if (n.data.isExternal) {
       nodeRect
-        .attr("fill", (n) => n.data.color ?? "#aaa")
-        .attr("stroke", "none");
+        .attr("fill", "transparent")
+        .attr("stroke", "var(--color)")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "8, 8");
+    } else if (n.data.fact) {
+      nodeRect
+        .attr("fill", (n) => n.data.color ?? "var(--color)")
+        .attr("stroke", "none")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "none");
     } else if (n.data.block) {
       nodeRect
         .attr("fill", "transparent")
@@ -154,22 +170,50 @@ export class NodeRenderer {
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "8, 8");
     } else {
-      console.error("Node has neither fact, nor block data");
+      console.error("Node has invalid data", n.data);
     }
   }
 
   updateNodes() {
-    this.updateNodeText(
-      d3.select(".nodes-parent").selectAll("g").select("text"),
+    const nodesSelection = d3.select(".nodes-parent").selectAll("g");
+
+    this.#updateNodeText(
+      nodesSelection.select("text"),
       (d) => CausalViewNodeUtils.getNodeDisplayingText(d.data)
     );
+
+    this.#updateStrokeAndFill(nodesSelection);
+    this.#updateNodeCaptions(nodesSelection);
+    this.#updateTitle(nodesSelection);
   }
 
-  updateNodeText(textSelection, getText) {
+  #updateStrokeAndFill(nodesSelection) {
+    nodesSelection
+      .select("rect")
+      .each(function (n) {
+        var nodeRect = d3.select(this);
+        NodeRenderer.applyNodeStrokeAndFill(n, nodeRect);
+      });
+  }
+
+  #updateNodeCaptions(nodesSelection) {
+    nodesSelection.select(".node-caption-text")
+      .text(d => d.data.isExternal ? "External Fact" : "");
+  }
+
+  #updateTitle(nodesSelection) {
+    nodesSelection
+      .select("title")
+      .text(d => d.data.isExternal
+        ? `External fact: ${d.data.id}\nNot found in the current model`
+        : (d.data.fact ? d.data.fact.factValue : CausalViewNodeUtils.getNodeId(d.data)));
+  }
+
+  #updateNodeText(textSelection, getText) {
     textSelection
       .text(getText)
-      .attr("font-weight", "bold")
       .attr("font-family", "sans-serif")
+      .attr("font-weight", "bold")
       .attr("text-anchor", "middle")
       .attr("alignment-baseline", "middle")
       .attr(

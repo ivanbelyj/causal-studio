@@ -32,6 +32,9 @@ export class CausalViewDataUtils {
       } else if (datum.block) {
         blocks.push(datum.block)
         nodeId = datum.block.id;
+      } else if (datum.isExternal) {
+        // Don't save external nodes data
+        continue;
       }
 
       const nodeData = { nodeId, ...datum };

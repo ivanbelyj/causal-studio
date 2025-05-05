@@ -36,8 +36,7 @@ export class DragAndDropManager {
       posDataBeforeDrag = dragAndDropManager.getNodesToDragPosData(
         CausalViewNodeUtils.getNodeId(d.data)
       );
-
-      d3.select(this).attr("cursor", "grabbing");
+      // d3.select(this).attr("cursor", "grabbing");
     }
 
     function dragged(event, d) {
@@ -68,7 +67,7 @@ export class DragAndDropManager {
       //   "to",
       //   posDataAfterDrag
       // );
-      d3.select(this).attr("cursor", "grab");
+      // d3.select(this).attr("cursor", "grab");
 
       const getPointOfDraggedNode = (posData) =>
         posData.find((x) => x.nodeId == draggedNodeId);

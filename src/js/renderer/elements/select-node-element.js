@@ -67,13 +67,15 @@ export class SelectNodeElement {
   }
 
   onNodeClicked(event) {
-    const { fact, block } = event.nodeSelection.data;
+    const { fact, block, isExternal, id } = event.nodeSelection.data;
 
     if (fact) {
       this.#updateSelectionFactOrNone(fact.id);
     }
     else if (block) {
       this.#updateBlockSelection(block);
+    } else if (isExternal) {
+      this.#updateSelectionFactOrNone(id);
     }
   }
 

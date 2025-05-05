@@ -37,15 +37,21 @@ export class NodesCreateRemoveManager {
   getRemoveNodeCommand(x, y, factId) {
     factId = factId ?? this.getNodeIdByPos(x, y);
     const nodeData = this.causalView.getNodeDataById(factId);
+    const nodeDataCopy = { ...nodeData };
+    const getNodeDataToCreate = () => ({ ...nodeDataCopy });
     return new Command(
-      () => this.#removeNodeById(factId),
-      () =>
+      () => {
+        this.#removeNodeById(factId);
+      },
+      () => {
+        const nodeDataToCreate = getNodeDataToCreate();
         this.createNodeWithNodeData(
-          nodeData
+          nodeDataToCreate
           // { x: node.ux, y: node.uy }
           // this.structure.nodeWidth,
           // this.structure.nodeHeight
-        )
+        );
+      }
     );
   }
 
@@ -56,7 +62,7 @@ export class NodesCreateRemoveManager {
   }
 
   createNodeWithNodeData(nodeData) {
-    this.causalView.addNodeWithData(nodeData);
+    this.causalView.setNodeWithData(nodeData);
 
     this.causesChangeManager.onCausesAdd(
       nodeData,

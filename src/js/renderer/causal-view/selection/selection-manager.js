@@ -54,6 +54,12 @@ export class CausalViewSelectionManager extends EventTarget {
     this.isSelectByClick = true;
   }
 
+  render() {
+    for (const selectedNodeId of this.selectedNodesIds ?? []) {
+      this.selectionRenderer.setSelectedAppearance(selectedNodeId);
+    }
+  }
+
   setSelectedNodeIds(ids) {
     // throw new Error("set selected node ids " + ids.length);
 
