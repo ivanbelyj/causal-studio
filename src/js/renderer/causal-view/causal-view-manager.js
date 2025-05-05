@@ -157,6 +157,7 @@ export class CausalViewManager {
 
   onCreateFactWithNameClicked(newFactId) {
     const nodeData = this.nodesCreateRemoveManager.createNodeData(newFactId);
+    nodeData.fact.factValue = "";
 
     this.undoRedoManager.execute(
       this.nodesCreateRemoveManager.getCreateNodeCommand(
