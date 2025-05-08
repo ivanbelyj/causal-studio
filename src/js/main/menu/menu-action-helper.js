@@ -14,7 +14,21 @@ export default class MenuActionHelper {
   constructor(window, dataManager, activeComponentTypes) {
     this.window = window;
     this.dataManager = dataManager;
+    this.activeComponentTypes = activeComponentTypes;
     this.causalRunHelper = new CausalRunHelper(window, activeComponentTypes);
+  }
+
+  openModelTransformTool() {
+    this.ensureComponentActive("Transform Tools");
+  }
+
+  ensureComponentActive(componentType) {
+    if (!this.activeComponentTypes.has(componentType)) {
+      this.window.webContents.send("set-component-active", {
+        componentType: componentType,
+        isActive: true,
+      });
+    }
   }
 
   sendMessage(messageName, data) {

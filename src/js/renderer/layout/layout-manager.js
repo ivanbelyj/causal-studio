@@ -12,17 +12,33 @@ import { createNodeComponent } from "./component-factories/create-node-component
 import { createFixationResultsComponent } from "./component-factories/create-fixation-results-component.js";
 import { createProbabilityEstimationResultsComponent } from "./component-factories/create-probability-estimation-results-component.js";
 import { CausalBundleDataManager } from "../data/causal-bundle-data-manager.js";
+import { createFactValueTransformerComponent } from "./component-factories/create-fact-value-transformer-component.js";
 
-const defaultComponentFactoriesByType = {
-  "Causal View": createCausalView,
-  "Node": createNodeComponent,
-  Causes: createCausesComponent,
-  Weights: createWeightsComponent,
-  "Project View": createProjectView,
-  Inspector: createInspectorComponent,
-  "Fixation Results": createFixationResultsComponent,
-  "Probability Estimation Results": createProbabilityEstimationResultsComponent,
-};
+const createComponentConfig = (createComponent, type, options = {}) => ({
+  createComponent,
+  data: { type, isCloseable: true, ...options }
+});
+
+const componentConfigs = [
+  { type: "Causal View", createComponent: createCausalView, options: { isCloseable: false } },
+  { type: "Node", createComponent: createNodeComponent },
+  { type: "Causes", createComponent: createCausesComponent },
+  { type: "Weights", createComponent: createWeightsComponent },
+  { type: "Project View", createComponent: createProjectView, options: { isCloseable: false } },
+  { type: "Inspector", createComponent: createInspectorComponent },
+  { type: "Fixation Results", createComponent: createFixationResultsComponent },
+  { type: "Probability Estimation Results", createComponent: createProbabilityEstimationResultsComponent },
+  { type: "Transform Tools", createComponent: createFactValueTransformerComponent }
+];
+
+const componentConfigsByType = componentConfigs.reduce((acc, config) => {
+  acc[config.type] = createComponentConfig(
+    config.createComponent,
+    config.type,
+    config.options || {}
+  );
+  return acc;
+}, {});
 
 export class LayoutManager {
   /**
@@ -50,7 +66,7 @@ export class LayoutManager {
 
     this.#initGoldenLayout();
 
-    this.#registerComponents(defaultComponentFactoriesByType);
+    this.#registerComponents();
     this.#loadConfig(config);
 
     this.api.onSetComponentActive(this.#onSetComponentActive.bind(this));
@@ -108,23 +124,29 @@ export class LayoutManager {
     const componentType = event.target.componentType;
     if (!componentType) return; // It is not a component
 
-    if (isCreated) this.componentTypesAndItems.set(componentType, event.target);
-    else this.componentTypesAndItems.delete(componentType);
+    if (isCreated) {
+      this.componentTypesAndItems.set(componentType, event.target);
+    } else {
+      this.componentTypesAndItems.delete(componentType);
+    }
+    this.#sendComponentActive(componentType, isCreated);
+  }
 
+  #sendComponentActive(componentType, isActive) {
     this.api.sendComponentActive({
       componentType,
-      isActive: isCreated,
+      isActive,
+      componentData: componentConfigsByType[componentType].data
     });
   }
 
   #loadConfig(config) {
     const loadedFromConfig =
       LayoutConfigUtils.getComponentTypesFromLayoutConfig(config);
-    for (const componentType in defaultComponentFactoriesByType) {
-      this.api.sendComponentActive({
+    for (const componentType in componentConfigsByType) {
+      this.#sendComponentActive(
         componentType,
-        isActive: loadedFromConfig.includes(componentType),
-      });
+        loadedFromConfig.includes(componentType));
     }
     this.layout.loadLayout(config);
   }
@@ -133,7 +155,7 @@ export class LayoutManager {
    * - Should be called once
    * - Every factory function will be bound to this LayoutManager
    */
-  #registerComponents(componentTypesAndFactories) {
+  #registerComponents() {
     // Components can put something here (in particular,
     // causalView reference will be available in this object)
     const componentsContext = {};
@@ -147,12 +169,12 @@ export class LayoutManager {
       componentsContext
     };
 
-    for (const [componentType, factoryFunc] of Object.entries(
-      componentTypesAndFactories
+    for (const [componentType, componentConfig] of Object.entries(
+      componentConfigsByType
     )) {
       this.layout.registerComponentFactoryFunction(
         componentType,
-        factoryFunc.bind({}, args)
+        componentConfig.createComponent.bind({}, args)
       );
     }
   }

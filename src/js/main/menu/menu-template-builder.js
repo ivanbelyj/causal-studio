@@ -170,6 +170,15 @@ export default class MenuTemplateBuilder {
         ],
       },
       {
+        label: "Tools",
+        submenu: [
+          {
+            label: "Transform model",
+            click: () => menuActionHelper.openModelTransformTool(),
+          },
+        ],
+      },
+      {
         label: "Theme",
         submenu: [
           {

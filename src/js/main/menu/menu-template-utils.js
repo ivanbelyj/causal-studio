@@ -1,5 +1,5 @@
 export default class MenuTemplateUtils {
-  static _createComponentToggleItem({
+  static #createComponentToggleItem({
     menuActionHelper,
     componentType,
     isActive,
@@ -24,15 +24,14 @@ export default class MenuTemplateUtils {
     registeredComponentTypes,
     activeComponentTypes,
   }) {
-    const componentMenuItems = [...(registeredComponentTypes ?? [])].map(
-      (componentType) => {
-        return MenuTemplateUtils._createComponentToggleItem({
-          menuActionHelper,
-          componentType,
-          isActive: activeComponentTypes.has(componentType),
-        });
-      }
-    );
+    const componentMenuItems = [];
+    for (const [componentType, componentData] of registeredComponentTypes) {
+      componentMenuItems.push(MenuTemplateUtils.#createComponentToggleItem({
+        menuActionHelper,
+        componentType,
+        isActive: activeComponentTypes.has(componentType),
+      }));
+    }
     return componentMenuItems;
   }
 }

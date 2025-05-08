@@ -38,12 +38,14 @@ export class MenuManager {
   }
 
   // Receive layout components data from the renderer process and render the menu
-  onSendComponentActive(event, { componentType, isActive }) {
+  onSendComponentActive(event, { componentType, isActive, componentData }) {
     if (!this.registeredComponentTypes) {
-      this.registeredComponentTypes = new Set();
+      this.registeredComponentTypes = new Map();
     }
-    if (!this.registeredComponentTypes.has(componentType)) {
-      this.registeredComponentTypes.add(componentType);
+    if (!this.registeredComponentTypes.has(componentType)
+      && componentData.isCloseable
+      && componentData) {
+      this.registeredComponentTypes.set(componentType, componentData);
     }
     if (isActive) {
       this.activeComponentTypes.add(componentType);

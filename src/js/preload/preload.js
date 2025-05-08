@@ -14,9 +14,8 @@ contextBridge.exposeInMainWorld("api", {
   sendCausalViewEnter: () => send("causal-view-enter"),
   sendCausalViewLeave: () => send("causal-view-leave"),
 
-  // When components are checked from the renderer process
-  sendComponentActive: (componentData) =>
-    send("send-component-active", componentData),
+  // When components are toggled from the renderer process
+  sendComponentActive: (data) => send("send-component-active", data),
 
   sendIsUnsavedChanges: (data) => send("send-is-unsaved-changes", data),
 
@@ -29,7 +28,7 @@ contextBridge.exposeInMainWorld("api", {
   onOpenData: (func) => on("open-data", func),
   onReset: (func) => on("reset", func),
 
-  // When a component is checked in the menu
+  // When components are toggled in the menu (main process)
   onSetComponentActive: (func) => on("set-component-active", func),
 
   onUndo: (func) => on("undo", func),
