@@ -56,7 +56,9 @@ export class NodeRenderer {
   #setLayout() {
     this.layout = d3dag
       .sugiyama() // base layout
-      .decross(d3dag.decrossOpt()) // minimize number of crossings
+      // The next option freezes arrangement of causal models
+      // with a large number of crossing edges, so it's disabled
+      // .decross(d3dag.decrossOpt()) // minimize number of crossings
       // set node size instead of constraining to fit
       .nodeSize((node) => {
         return [
