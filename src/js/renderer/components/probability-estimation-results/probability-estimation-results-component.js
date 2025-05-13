@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import ColorUtils from "../../common/color-utils";
 
 // Warning: AI-generated component
 export class ProbabilityEstimationResultsComponent {
@@ -212,7 +213,7 @@ export class ProbabilityEstimationResultsComponent {
         content.append("div")
             .attr("class", "probability-value")
             .style("padding", "0.25em 0")
-            .style("color", "var(--color)")
+            .style("color", "#ddd")
             .append("span")
             .style("background", this.getProbabilityColor(probability))
             .style("padding", "0.25em 0.5em")
@@ -226,8 +227,12 @@ export class ProbabilityEstimationResultsComponent {
     }
 
     getProbabilityColor(probability) {
-        const hue = Math.round(probability * 120);
-        return `hsla(${hue}, 85%, 50%, 0.3)`;
+        return ColorUtils.getProbabilityColor(
+            probability,
+            { saturation: 0.5, lightness: 0.5, opacity: 0.9 }
+        );
+        // const hue = Math.round(probability * 120);
+        // return `hsla(${hue}, 85%, 50%, 0.3)`;
     }
 
     copyToClipboard(text, targetElement) {

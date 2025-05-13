@@ -24,6 +24,11 @@ export default class MenuTemplateUtils {
     registeredComponentTypes,
     activeComponentTypes,
   }) {
+    // Todo: research why it's called with undefined the first time
+    if (!registeredComponentTypes) {
+      return;
+    }
+
     const componentMenuItems = [];
     for (const [componentType, componentData] of registeredComponentTypes) {
       componentMenuItems.push(MenuTemplateUtils.#createComponentToggleItem({

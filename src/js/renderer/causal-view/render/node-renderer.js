@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import * as d3dag from "d3-dag";
 import { CausalModelUtils } from "../causal-model-utils.js";
 import { CausalViewNodeUtils } from "./causal-view-node-utils.js";
+import ColorUtils from "../../common/color-utils.js";
 
 const showDebugMessages = false;
 
@@ -12,6 +13,8 @@ const nodeHeightMultiplier = 3;
  * Class responsible for rendering nodes in the causal view structure.
  */
 export class NodeRenderer {
+  #probabilityEstimationResultsProvider;
+
   nodeWidth;
   nodeHeight;
 
@@ -37,7 +40,8 @@ export class NodeRenderer {
     onNodeClicked,
     onMouseEnter,
     onMouseLeave,
-    onEnterNodesSelection
+    onEnterNodesSelection,
+    probabilityEstimationResultsProvider
   ) {
     this.nodesParent = nodesParent;
     this.graphManager = graphManager;
@@ -50,34 +54,13 @@ export class NodeRenderer {
 
     this.onEnterNodesSelection = onEnterNodesSelection;
 
+    this.#probabilityEstimationResultsProvider = probabilityEstimationResultsProvider;
+
     this.#setLayout();
   }
 
-  #setLayout() {
-    this.layout = d3dag
-      .sugiyama() // base layout
-      // The next option freezes arrangement of causal models
-      // with a large number of crossing edges, so it's disabled
-      // .decross(d3dag.decrossOpt()) // minimize number of crossings
-      // set node size instead of constraining to fit
-      .nodeSize((node) => {
-        return [
-          (node ? nodeWidthMultiplier : 0) * this.nodeWidth,
-          nodeHeightMultiplier * this.nodeHeight,
-        ];
-      });
-  }
-
-  reset() {
-    this.#setDagWidthAndHeight();
-  }
-
-  #setDagWidthAndHeight() {
-    const { width: dagWidth, height: dagHeight } = this.layout(
-      this.graphManager.mutGraph
-    );
-    this.dagWidth = dagWidth;
-    this.dagHeight = dagHeight;
+  get #showProbabilityEstimationResults() {
+    return this.#probabilityEstimationResultsProvider.showProbabilityEstimationResults;
   }
 
   renderNodes() {
@@ -140,7 +123,35 @@ export class NodeRenderer {
           exit.remove();
         }.bind(this)
       );
+
     this.updateNodes();
+  }
+
+  reset() {
+    this.#setDagWidthAndHeight();
+  }
+
+  #setLayout() {
+    this.layout = d3dag
+      .sugiyama() // base layout
+      // The next option freezes arrangement of causal models
+      // with a large number of crossing edges, so it's disabled
+      // .decross(d3dag.decrossOpt()) // minimize number of crossings
+      // set node size instead of constraining to fit
+      .nodeSize((node) => {
+        return [
+          (node ? nodeWidthMultiplier : 0) * this.nodeWidth,
+          nodeHeightMultiplier * this.nodeHeight,
+        ];
+      });
+  }
+
+  #setDagWidthAndHeight() {
+    const { width: dagWidth, height: dagHeight } = this.layout(
+      this.graphManager.mutGraph
+    );
+    this.dagWidth = dagWidth;
+    this.dagHeight = dagHeight;
   }
 
   #applyNodeStyles(enterNodesSelection) {
@@ -152,7 +163,7 @@ export class NodeRenderer {
       .attr("ry", 5);
   }
 
-  static applyNodeStrokeAndFill(n, nodeRect) {
+  applyNodeStrokeAndFill(n, nodeRect) {
     if (n.data.isExternal) {
       nodeRect
         .attr("fill", "transparent")
@@ -161,7 +172,16 @@ export class NodeRenderer {
         .attr("stroke-dasharray", "8, 8");
     } else if (n.data.fact) {
       nodeRect
-        .attr("fill", (n) => n.data.color ?? "var(--color)")
+        .attr("fill", (n) => {
+          const factId = n.data.fact?.id;
+          if (this.#showProbabilityEstimationResults && factId) {
+            const probabilityData = this.#getProbabilityDataByFactId(factId);
+            if (probabilityData) {
+              return this.#getProbabilityColor(probabilityData.estimatedProbability);
+            }
+          }
+          return n.data.color ?? "var(--color)";
+        })
         .attr("stroke", "none")
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "none");
@@ -174,6 +194,10 @@ export class NodeRenderer {
     } else {
       console.error("Node has invalid data", n.data);
     }
+  }
+
+  #getProbabilityColor(probability) {
+    return this.#probabilityEstimationResultsProvider.getProbabilityColor(probability);
   }
 
   updateNodes() {
@@ -190,25 +214,73 @@ export class NodeRenderer {
   }
 
   #updateStrokeAndFill(nodesSelection) {
+    const self = this;
     nodesSelection
       .select("rect")
       .each(function (n) {
         var nodeRect = d3.select(this);
-        NodeRenderer.applyNodeStrokeAndFill(n, nodeRect);
+        self.applyNodeStrokeAndFill(n, nodeRect);
       });
   }
 
+  static getPercentageString(probability) {
+    return (probability * 100).toFixed(2) + '%';
+  }
+
   #updateNodeCaptions(nodesSelection) {
-    nodesSelection.select(".node-caption-text")
-      .text(d => d.data.isExternal ? "External Fact" : "");
+    const getText = (d) => {
+      if (d.data.isExternal) {
+        return "External Fact";
+      }
+      if (this.#showProbabilityEstimationResults) {
+        if (!this.#probabilityEstimationResultsProvider.probabilityEstimationResultsByFactKey) {
+          console.error(
+            "showProbabilityEstimationResults is", this.#showProbabilityEstimationResults,
+            ", but probability estimation results were not set");
+        }
+        const factId = d.data.fact?.id;
+        const probabilityData = factId ? this.#getProbabilityDataByFactId(factId) : null;
+        if (!probabilityData) {
+          return "";
+        }
+        return probabilityData.estimatedProbability !== undefined
+          && probabilityData.estimatedProbability !== null
+          ? NodeRenderer.getPercentageString(probabilityData.estimatedProbability)
+          : "";
+      }
+      return "";
+    }
+    nodesSelection
+      .select(".node-caption-text")
+      .text(getText);
+  }
+
+  #getProbabilityDataByFactId(factId) {
+    return this.#probabilityEstimationResultsProvider.getProbabilityDataByFactId(factId);
   }
 
   #updateTitle(nodesSelection) {
     nodesSelection
       .select("title")
-      .text(d => d.data.isExternal
-        ? `External fact: ${d.data.id}\nNot found in the current model`
-        : (d.data.fact ? d.data.fact.factValue : CausalViewNodeUtils.getNodeId(d.data)));
+      .text(d => {
+        if (d.data.isExternal) {
+          return `External fact: ${d.data.id}\nNot found in the current model`;
+        }
+        const fact = d.data.fact;
+        let text = (fact ? fact.factValue : CausalViewNodeUtils.getNodeId(d.data));
+        if (this.#showProbabilityEstimationResults && fact) {
+          const factProbabilityData = this.#getProbabilityDataByFactId(fact.id);
+          if (factProbabilityData?.estimatedProbability) {
+            const percentage = NodeRenderer.getPercentageString(factProbabilityData.estimatedProbability);
+            if (text.includes("\n")) {
+              text = `${text}\nEstimated probability: ${percentage}`
+            } else {
+              text = `${text} (${percentage})`;
+            }
+          }
+        }
+        return text;
+      });
   }
 
   #updateNodeText(textSelection, getText) {
@@ -222,6 +294,6 @@ export class NodeRenderer {
         "transform",
         `translate(${this.nodeWidth / 2}, ${this.nodeHeight / 2})`
       )
-      .attr("fill", "var(--color)");
+      .attr("fill", this.#showProbabilityEstimationResults ? "#ddd" : "var(--color)");
   }
 }

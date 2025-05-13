@@ -6,6 +6,7 @@ import { NodeRenderer } from "./render/node-renderer.js";
 import { ZoomManager } from "./render/zoom-manager.js";
 import { ViewRenderer } from "./render/view-renderer.js";
 import { DragAndDropManager } from "./drag-and-drop-manager.js";
+import { ProbabilityEstimationResultsProvider } from "./render/probability-estimation-results-provider.js";
 
 export const nodeWidth = 140;
 export const nodeHeight = 40;
@@ -23,10 +24,13 @@ export class CausalView extends EventTarget {
 
   undoRedoManager;
   selectionManager;
+  probabilityEstimationResultsProvider;
 
-  constructor(undoRedoManager) {
+  constructor(undoRedoManager, api) {
     super();
     this.undoRedoManager = undoRedoManager;
+    this.api = api;
+    this.probabilityEstimationResultsProvider = new ProbabilityEstimationResultsProvider();
   }
 
   init(svgParent, nodesData, selectionManager) {
@@ -41,7 +45,8 @@ export class CausalView extends EventTarget {
       this.viewRenderer.svgChild,
       this.graphManager,
       nodeWidth,
-      nodeHeight
+      nodeHeight,
+      this.probabilityEstimationResultsProvider
     );
 
     this.nodeRenderer = new NodeRenderer(
@@ -52,7 +57,8 @@ export class CausalView extends EventTarget {
       this.onNodeClicked.bind(this),
       this.onMouseEnter.bind(this),
       this.onMouseLeave.bind(this),
-      this.onEnterNodesSelection.bind(this)
+      this.onEnterNodesSelection.bind(this),
+      this.probabilityEstimationResultsProvider
     );
     this.zoomManager = new ZoomManager(
       this.viewRenderer.svg,
@@ -120,27 +126,58 @@ export class CausalView extends EventTarget {
   }
 
   render() {
-    this.nodeRenderer.renderNodes();
+    this.nodeRenderer.renderNodes(
+      this.showProbabilityEstimationResults
+        ? this.probabilityEstimationResults
+        : null);
     this.edgeRenderer.renderEdges();
     this.selectionManager.render();
+  }
+
+  setProbabilitiesVisualizationData(probabilityEstimationResults, showProbabilityEstimationResults = true) {
+    this.probabilityEstimationResultsProvider.setProbabilityEstimationResults(probabilityEstimationResults);
+    this.probabilityEstimationResultsProvider.showProbabilityEstimationResults = showProbabilityEstimationResults;
+  }
+
+  resetProbabilitiesVisualization() {
+    this.probabilityEstimationResultsProvider.resetProbabilitiesVisualization();
   }
 
   updateEdges() {
     this.edgeRenderer.updateEdges();
   }
 
-  reset(nodesData) {
+  reset(nodesData, causalModelName) {
     nodesData = this.#ensureNodesDataExist(nodesData);
+    this.probabilityEstimationResultsProvider.currentCausalModelName = causalModelName;
 
     this.graphManager.resetGraph(nodesData);
     this.nodeRenderer.reset();
 
     this.viewRenderer.reset();
 
+    this.#prepareNodesDataToRender();
     this.render();
 
     // Positions are set for the nodes after render
     this.graphManager.ensureNodeDataPositionsSet(nodesData);
+  }
+
+  #prepareNodesDataToRender() {
+    const nodes = this.graphManager.getNodes();
+
+    this.#restoreNodePositions(nodes);
+  }
+
+  #restoreNodePositions(nodes) {
+    for (const node of nodes) {
+      if (node.data.x !== undefined && node.data.y !== undefined) {
+        node.x = node.data.x;
+        node.y = node.data.y;
+      }
+      // Otherwise positions from graph stratify will be used
+      // (it's supposed that they already were set previously)
+    }
   }
 
   #ensureNodesDataExist(nodesData) {
@@ -205,20 +242,14 @@ export class CausalView extends EventTarget {
   }
 
   setInitialZoom() {
-    this.zoomManager.setInitialZoom(
-      this.nodeRenderer.dagWidth,
-      this.nodeRenderer.dagHeight
-    );
+    this.zoomManager.setInitialZoomFromNodesData(this.getNodesData());
+    // this.zoomManager.setInitialZoomFromDagSize(
+    //   this.nodeRenderer.dagWidth,
+    //   this.nodeRenderer.dagHeight
+    // );
   }
 
   getViewNode() {
     return this.viewRenderer.svgChild.node();
   }
-
-  // updateScaleExtent() {
-  //   this.zoomManager.updateScaleExtent(
-  //     this.nodeRenderer.dagWidth,
-  //     this.nodeRenderer.dagHeight
-  //   );
-  // }
 }

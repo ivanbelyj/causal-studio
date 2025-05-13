@@ -116,8 +116,15 @@ export class DragAndDropManager {
         `.${CausalModelUtils.getNodeIdClassNameByNodeId(nodeId)}`
       );
       const nodeDatum = nodeSelection.datum();
+
+      // Update saved data
+      nodeDatum.data.x = x;
+      nodeDatum.data.y = y;
+
+      // Update rendered position
       nodeDatum.ux = x;
       nodeDatum.uy = y;
+
       nodeSelection.attr("transform", (d) => {
         return `translate(${x}, ${y})`;
       });

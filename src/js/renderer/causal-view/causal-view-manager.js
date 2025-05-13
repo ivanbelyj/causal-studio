@@ -50,6 +50,15 @@ export class CausalViewManager {
 
     this.dataManager = dataManager;
     this.dataManager.setCurrentCausalViewDataManager(this.causalViewDataManager);
+
+    this.#initSimulationResultEventListeners();
+  }
+
+  #initSimulationResultEventListeners() {
+    this.api.onProbabilityEstimationCompleted((event, data) => {
+      this.structure.setProbabilitiesVisualizationData(data, true);
+      this.structure.render();
+    });
   }
 
   init(nodesData) {
@@ -72,8 +81,10 @@ export class CausalViewManager {
     eventBus.off("causalModelSelected", this.#eventHandlers.causalModelSelected);
   }
 
-  reset(nodesData) {
-    this.structure.reset(nodesData);
+  reset(nodesData, causalModelName) {
+    this.structure.resetProbabilitiesVisualization();
+
+    this.structure.reset(nodesData, causalModelName);
     this.structure.setInitialZoom();
   }
 
@@ -128,7 +139,7 @@ export class CausalViewManager {
     const causalViewData = CausalViewDataUtils.factsAndNodesDataToCausalViewData(selectedCausalModel);
     this.causalViewDataManager.causalModelName = causalModelName;
 
-    this.reset(causalViewData);
+    this.reset(causalViewData, causalModelName);
   }
 
   onDeclareBlockClicked({

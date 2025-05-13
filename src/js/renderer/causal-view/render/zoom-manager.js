@@ -1,14 +1,11 @@
 import * as d3 from "d3";
-
 import { nodeWidth, nodeHeight } from "../causal-view";
 
 export class ZoomManager {
   constructor(svg, svgChild, onZoom) {
     this.svg = svg;
     this.svgChild = svgChild;
-
     this.onZoom = onZoom;
-
     this.#setupZoom();
   }
 
@@ -17,55 +14,74 @@ export class ZoomManager {
     this.svg.call(this.zoom);
   }
 
-  updateScaleExtent(dagWidth, dagHeight) {
-    // const defaultMinScale = 0.5;
-    // const k0 = dagWidth > 0
-    //   ? Math.min(
-    //     this.svg.node().clientWidth / dagWidth / 2,
-    //     defaultMinScale) * 0.3
-    //   : defaultMinScale;
-    this.zoom.scaleExtent([
-      0.035,
-      2,
-      // Math.max(
-      //   this.svg.node().clientWidth / this.nodeWidth,
-      //   this.svg.node().clientHeight / this.nodeHeight
-      // ),
-    ]); // Zoom limits
+  setScaleExtent() {
+    this.zoom.scaleExtent([0.035, 2]);
   }
 
-  // static clamp(value, min, max) {
-  //   return Math.min(Math.max(value, min), max);
-  // }
+  #calculateBoundsFromNodesData(nodesData) {
+    if (!nodesData || nodesData.length === 0) return null;
 
-  setInitialZoom(dagWidth, dagHeight) {
-    // Calculate initial scale factor
-    const isNotEmpty = dagWidth > 0;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
 
-    const scaleFactor = isNotEmpty
-      ? Math.min(
-        this.svg.node().clientWidth / dagWidth,
-        this.svg.node().clientHeight / dagHeight
-      )
-      : null;
+    nodesData.forEach(nodeData => {
+      if (nodeData.x === undefined || nodeData.y === undefined) {
+        console.error(
+          "Node data doesn't contain coordinates to calculate bounds for initial zoom",
+          nodeData);
+      }
+      const x = nodeData.x;
+      const y = nodeData.y;
 
-    // Calculate translation coordinates
-    const translateX =
-      (this.svg.node().clientWidth - (dagWidth + nodeWidth) * scaleFactor) / 2;
-    const translateY =
-      (this.svg.node().clientHeight - (dagHeight + nodeHeight) * scaleFactor) / 2;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x + nodeWidth);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y + nodeHeight);
+    });
 
-    // Apply initial zoom and center the graph
+    return {
+      width: maxX - minX,
+      height: maxY - minY,
+      minX,
+      minY
+    };
+  }
+
+  #getInitialTransform(width, height, minX = 0, minY = 0) {
+    const isNotEmpty = width > 0 && height > 0;
+
+    if (!isNotEmpty) return d3.zoomIdentity;
+
+    const scaleFactor = Math.min(
+      this.svg.node().clientWidth / width,
+      this.svg.node().clientHeight / height
+    );
+
+    const translateX = (this.svg.node().clientWidth - width * scaleFactor) / 2 - minX * scaleFactor;
+    const translateY = (this.svg.node().clientHeight - height * scaleFactor) / 2 - minY * scaleFactor;
+
+    return d3.zoomIdentity.translate(translateX, translateY).scale(scaleFactor);
+  }
+
+  #applyInitialTransform(transform) {
     this.svg
       .transition()
       .duration(750)
-      .call(
-        this.zoom.transform,
-        isNotEmpty
-          ? d3.zoomIdentity.translate(translateX, translateY).scale(scaleFactor)
-          : d3.zoomIdentity
-      );
+      .call(this.zoom.transform, transform);
 
-    this.updateScaleExtent(dagWidth, dagHeight);
+    this.setScaleExtent();
+  }
+
+  setInitialZoomFromDagSize(dagWidth, dagHeight) {
+    const transform = this.#getInitialTransform(dagWidth, dagHeight);
+    this.#applyInitialTransform(transform);
+  }
+
+  setInitialZoomFromNodesData(nodesData) {
+    const bounds = this.#calculateBoundsFromNodesData(nodesData);
+    const transform = bounds
+      ? this.#getInitialTransform(bounds.width, bounds.height, bounds.minX, bounds.minY)
+      : d3.zoomIdentity;
+
+    this.#applyInitialTransform(transform);
   }
 }

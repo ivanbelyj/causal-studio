@@ -8,6 +8,8 @@ const showDebugMessages = false;
  * Class responsible for rendering edges in the causal view structure.
  */
 export class EdgeRenderer {
+  #probabilityEstimationResultsProvider;
+
   edgesParent;
   edgesDefs;
   svgChild;
@@ -24,7 +26,8 @@ export class EdgeRenderer {
     svgChild,
     graphManager,
     nodeWidth,
-    nodeHeight
+    nodeHeight,
+    probabilityEstimationResultsProvider
   ) {
     this.edgesParent = edgesParent;
     this.edgesDefs = edgesDefs;
@@ -33,6 +36,8 @@ export class EdgeRenderer {
 
     this.nodeWidth = nodeWidth;
     this.nodeHeight = nodeHeight;
+
+    this.#probabilityEstimationResultsProvider = probabilityEstimationResultsProvider;
 
     this.#setLine();
   }
@@ -79,6 +84,15 @@ export class EdgeRenderer {
 
     const edgeDataToString = this.#edgeDataToString;
 
+    const getNodeColor = (node) => {
+      const factId = node.data.fact?.id;
+      if (!factId || !this.#probabilityEstimationResultsProvider.showProbabilityEstimationResults) {
+        return node.data.color;
+      }
+      return this.#probabilityEstimationResultsProvider.getFactProbabilityColor(factId)
+        ?? node.data.color;
+    };
+
     const showLog = showDebugMessages;
     if (showLog) console.log("edges");
     edgePathsSelection.join(
@@ -96,6 +110,8 @@ export class EdgeRenderer {
               CausalViewNodeUtils.getNodeId(target.data),
             );
 
+            // Todo: move set gradients logic into update section.
+            // Now it's not working properly
             const grad = edgesDefs
               .append("linearGradient")
               .attr("id", gradId)
@@ -103,11 +119,11 @@ export class EdgeRenderer {
             grad
               .append("stop")
               .attr("offset", "0%")
-              .attr("stop-color", source.data.color);
+              .attr("stop-color", getNodeColor(source));
             grad
               .append("stop")
               .attr("offset", "100%")
-              .attr("stop-color", target.data.color);
+              .attr("stop-color", getNodeColor(target));
             return `url(#${gradId})`;
           })
           .attr("marker-end", "url(#arrowId)");

@@ -31,6 +31,7 @@ export class SelectionRenderer {
   }
 
   setNotSelectedAppearance(nodeId) {
+    const self = this;
     d3.select(`.${CausalModelUtils.getNodeIdClassNameByNodeId(nodeId)}`)
       .select("rect")
       .classed("node__rect_selected", false)
@@ -38,7 +39,7 @@ export class SelectionRenderer {
       .each(function (n) {
         var nodeRect = d3.select(this);
 
-        NodeRenderer.applyNodeStrokeAndFill(n, nodeRect)
+        self._causalView.nodeRenderer.applyNodeStrokeAndFill(n, nodeRect)
       });
   }
 
