@@ -32,7 +32,7 @@ export class FixationResultsComponent {
 
         this.initResizeObserver();
         this.renderInfoSection(data);
-        this.renderModelInstancesSection(data.modelInstanceElementsByModelInstanceId);
+        this.renderModelInstancesSection(data.modelInstanceInfoById);
     }
 
     clearComponent() {
