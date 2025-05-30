@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+const eventBus = require("js-event-bus")();
 
 export class AppThemeManager {
     init() {
@@ -22,16 +23,17 @@ export class AppThemeManager {
             .attr("id", "theme-link");
     }
 
-    updateTheme(isDarkMode) {
+    updateTheme(isDarkTheme) {
         d3.select("#goldenlayout-theme-link").attr(
             "href",
-            `../goldenlayout${isDarkMode ? "Dark" : "Light"}.css`
+            `../goldenlayout${isDarkTheme ? "Dark" : "Light"}.css`
             // isDarkMode ? glDark : glLight
         );
         d3.select("#theme-link").attr(
             "href",
-            `../${isDarkMode ? "dark" : "light"}.css`
+            `../${isDarkTheme ? "dark" : "light"}.css`
             // isDarkMode ? dark : light
         );
+        eventBus.emit("themeChanged", null, { isDarkTheme });
     }
 }

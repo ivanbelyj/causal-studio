@@ -19,11 +19,11 @@ export class Application {
 
         const undoRedoManager = new UndoRedoManager(window.api);
 
-        const layoutManager = new AppLayoutManager();
-        layoutManager.init(causalBundleDataManager, undoRedoManager);
-
         const themeManager = new AppThemeManager();
         themeManager.init();
+
+        const layoutManager = new AppLayoutManager();
+        layoutManager.init(causalBundleDataManager, undoRedoManager, themeManager);
 
         const eventManager = new AppEventManager();
         eventManager.init();

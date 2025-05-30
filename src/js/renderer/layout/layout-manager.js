@@ -13,6 +13,7 @@ import { createFixationResultsComponent } from "./component-factories/create-fix
 import { createProbabilityEstimationResultsComponent } from "./component-factories/create-probability-estimation-results-component.js";
 import { CausalBundleDataManager } from "../data/causal-bundle-data-manager.js";
 import { createFactValueTransformerComponent } from "./component-factories/create-fact-value-transformer-component.js";
+import { AppThemeManager } from "../application/app-theme-manager.js";
 
 const createComponentConfig = (createComponent, type, options = {}) => ({
   createComponent,
@@ -47,8 +48,9 @@ export class LayoutManager {
    * @param {*} api 
    * @param {CausalBundleDataManager} dataManager 
    * @param {*} undoRedoManager 
+   * @param {AppThemeManager} themeManager
    */
-  constructor(layoutSelector, api, dataManager, undoRedoManager) {
+  constructor(layoutSelector, api, dataManager, undoRedoManager, themeManager) {
     this.layoutContainer = d3
       .select(layoutSelector)
       .attr("class", "layout-container");
@@ -57,8 +59,8 @@ export class LayoutManager {
     this.componentTypesAndItems = new Map();
 
     this.dataManager = dataManager;
-
     this.undoRedoManager = undoRedoManager;
+    this.themeManager = themeManager;
   }
 
   initLayout(config) {
@@ -166,7 +168,8 @@ export class LayoutManager {
       dataManager: this.dataManager,
       undoRedoManager: this.undoRedoManager,
       layout: this.layout,
-      componentsContext
+      componentsContext,
+      themeManager: this.themeManager
     };
 
     for (const [componentType, componentConfig] of Object.entries(

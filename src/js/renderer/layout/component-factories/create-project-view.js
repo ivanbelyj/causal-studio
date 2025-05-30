@@ -10,7 +10,7 @@ export function createProjectView(
   projectView.init();
   const projectViewManager = new ProjectViewManager({
     projectView,
-    api: api,
-    dataManager: dataManager,
+    api,
+    dataManager
   });
 }

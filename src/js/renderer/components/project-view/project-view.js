@@ -6,12 +6,15 @@ import { JsTreeDataUtils } from "./js-tree-data-utils";
 import { EventSendingProjectViewNodeHandler } from "./event-sending-project-view-node-handler";
 import ProjectViewContextMenuManager from "./project-view-context-menu-manager";
 
+const eventBus = require("js-event-bus")();
+
 const projectViewId = "#project-view";
 
 export class ProjectView {
   constructor(selector, dataManager) {
     this.component = d3.select(selector);
     this.dataManager = dataManager;
+    this.currentTheme = 'default-dark'; // Default theme
   }
 
   init() {
@@ -23,6 +26,10 @@ export class ProjectView {
       () => {
         this.setProjectData(this.dataManager.projectData);
       });
+
+    eventBus.on("themeChanged", ({ isDarkTheme }) => {
+      this.#updateJsTreeTheme(isDarkTheme);
+    });
   }
 
   setProjectData(projectData) {
@@ -60,10 +67,21 @@ export class ProjectView {
     }
   }
 
+  #updateJsTreeTheme(isDarkMode) {
+    const newTheme = isDarkMode ? 'default-dark' : 'default';
+    if (this.currentTheme !== newTheme) {
+      this.currentTheme = newTheme;
+      const instance = $(projectViewId).jstree(true);
+      if (instance) {
+        instance.set_theme(newTheme);
+      }
+    }
+  }
+
   #initJsTree() {
     this.component.append("div").attr("id", "project-view");
 
-    $.jstree.defaults.core.themes.name = "default-dark";
+    $.jstree.defaults.core.themes.name = this.currentTheme;
 
     $(() => {
       const onJsTreeChanged = this.onJsTreeChanged.bind(this);
@@ -75,7 +93,7 @@ export class ProjectView {
           data: [],
           animation: 0,
           themes: {
-            theme: "default-dark",
+            theme: this.currentTheme,
             icons: false,
           },
         },
