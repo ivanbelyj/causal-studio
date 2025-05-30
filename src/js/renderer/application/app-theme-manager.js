@@ -27,12 +27,10 @@ export class AppThemeManager {
         d3.select("#goldenlayout-theme-link").attr(
             "href",
             `../goldenlayout${isDarkTheme ? "Dark" : "Light"}.css`
-            // isDarkMode ? glDark : glLight
         );
         d3.select("#theme-link").attr(
             "href",
             `../${isDarkTheme ? "dark" : "light"}.css`
-            // isDarkMode ? dark : light
         );
         eventBus.emit("themeChanged", null, { isDarkTheme });
     }

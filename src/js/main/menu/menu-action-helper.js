@@ -1,8 +1,8 @@
 import { CausalRunHelper } from "../causal-cli-integration/causal-run-helper";
 import { DataManager } from "../data-management/data-manager";
-import { DataStore } from "../data-management/data-store";
+import { ThemeManager } from "../theme-manager";
 
-const { nativeTheme, shell } = require("electron");
+const { shell } = require("electron");
 
 export default class MenuActionHelper {
   /**
@@ -48,7 +48,7 @@ export default class MenuActionHelper {
   }
 
   switchTheme(theme) {
-    nativeTheme.themeSource = theme;
+    ThemeManager.setTheme(theme);
   }
 
   createNewProject() {

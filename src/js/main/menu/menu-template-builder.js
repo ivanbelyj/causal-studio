@@ -1,3 +1,4 @@
+import { ThemeManager } from "../theme-manager.js";
 import MenuTemplateUtils from "./menu-template-utils.js";
 
 const isMac = process.platform === "darwin";
@@ -13,6 +14,8 @@ export default class MenuTemplateBuilder {
       activeComponentTypes,
       registeredComponentTypes,
     });
+    const currentTheme = ThemeManager.getTheme();
+
     return [
       // { role: 'appMenu' }
       ...(isMac
@@ -184,16 +187,19 @@ export default class MenuTemplateBuilder {
           {
             label: "System",
             type: "radio",
+            checked: currentTheme === "system",
             click: () => menuActionHelper.switchTheme("system"),
           },
           {
             label: "Light",
             type: "radio",
+            checked: currentTheme === "light",
             click: () => menuActionHelper.switchTheme("light"),
           },
           {
             label: "Dark",
             type: "radio",
+            checked: currentTheme === "dark",
             click: () => menuActionHelper.switchTheme("dark"),
           },
         ],

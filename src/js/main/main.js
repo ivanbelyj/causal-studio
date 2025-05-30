@@ -6,6 +6,7 @@ const { DataStore } = require("./data-management/data-store.js");
 const { SplashScreen } = require("../../splash/splash-screen.js");
 const path = require("path");
 const { IpcManager } = require("./ipc/ipc-manager.js");
+const { ThemeManager } = require("./theme-manager.js");
 
 // Creates the browser window
 async function createWindow(appLocale) {
@@ -48,22 +49,20 @@ async function createWindow(appLocale) {
   return mainWindow;
 }
 
-let mainWindow;
-
-let dataManager;
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   const appLocale = app.getLocale();
-  mainWindow = await createWindow(appLocale);
+  const mainWindow = await createWindow(appLocale);
 
   const contextMenuManager = new ContextMenuManager(mainWindow);
   contextMenuManager.setContextMenu();
 
   const dataStore = new DataStore();
-  dataManager = new DataManager(mainWindow, dataStore);
+  const dataManager = new DataManager(mainWindow, dataStore);
+
+  ThemeManager.init();
 
   const menuManager = new MenuManager(dataManager, mainWindow);
   menuManager.render();

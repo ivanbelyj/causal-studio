@@ -49,6 +49,7 @@
     "d3-dag": "^1.0.0",
     "electron-context-menu": "^3.6.1",
     "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^10.0.1",
     "golden-layout": "^2.6.0",
     "jquery": "^3.7.1",
     "js-event-bus": "^1.1.1",
