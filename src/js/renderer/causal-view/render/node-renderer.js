@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import * as d3dag from "d3-dag";
 import { CausalModelUtils } from "../causal-model-utils.js";
 import { CausalViewNodeUtils } from "./causal-view-node-utils.js";
-import ColorUtils from "../../common/color-utils.js";
+import { StringUtils } from "../../common/string-utils.js";
 
 const showDebugMessages = false;
 
@@ -267,7 +267,11 @@ export class NodeRenderer {
           return `External fact: ${d.data.id}\nNot found in the current model`;
         }
         const fact = d.data.fact;
-        let text = (fact ? fact.factValue : CausalViewNodeUtils.getNodeId(d.data));
+        let text = d.data.title
+          ? d.data.title
+          : StringUtils.truncateTextWithEllipsisByLength(
+            fact.factValue.replaceAll("\n", " "),
+            56);
         if (this.#showProbabilityEstimationResults && fact) {
           const factProbabilityData = this.#getProbabilityDataByFactId(fact.id);
           if (factProbabilityData?.estimatedProbability) {

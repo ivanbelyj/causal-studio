@@ -8,6 +8,13 @@ export class AppThemeManager {
             this.updateTheme(e.matches);
         });
 
+        // Main process loads user's theme preference from config
+        // and sends an event. We should update js-tree theme.
+        // Without this fix js-tree theme won't be updated
+        window.api.onThemeSet((event) => {
+            this.updateTheme(mediaQuery.matches);
+        });
+
         this.initTheme();
         this.updateTheme(mediaQuery.matches);
     }

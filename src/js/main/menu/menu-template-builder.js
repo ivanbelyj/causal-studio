@@ -97,7 +97,7 @@ export default class MenuTemplateBuilder {
               },
             ]
             : [
-              { role: "delete" },
+              // { role: "delete" },
               { type: "separator" },
               {
                 label: "Select All",
@@ -163,16 +163,17 @@ export default class MenuTemplateBuilder {
           //   label: "Run Specified Model",
           //   click: () => menuActionHelper.runCausalBundleWithSpecifiedModel(),
           // },
-          {
-            label: "Run (File)",
-            accelerator: "CmdOrCtrl+Alt+R",
-            click: () => menuActionHelper.runCausalBundleWithFilePicker(),
-          },
-          {
-            label: "Run Probability Estimation (File)",
-            accelerator: "CmdOrCtrl+Alt+Shift+R",
-            click: () => menuActionHelper.runProbabilityEstimationWithFilePicker(),
-          },
+          // Todo: fix "--input is required" error
+          // {
+          //   label: "Run (File)",
+          //   accelerator: "CmdOrCtrl+Alt+R",
+          //   click: () => menuActionHelper.runCausalBundleWithFilePicker(),
+          // },
+          // {
+          //   label: "Run Probability Estimation (File)",
+          //   accelerator: "CmdOrCtrl+Alt+Shift+R",
+          //   click: () => menuActionHelper.runProbabilityEstimationWithFilePicker(),
+          // },
         ],
       },
       {

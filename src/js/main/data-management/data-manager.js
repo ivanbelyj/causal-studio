@@ -6,18 +6,12 @@ import { DataProcessingHelper } from "./data-processing-helper";
 import { ProjectData } from "../data/project-data";
 import { DataStore } from "./data-store";
 
-const cmPrjFilter = {
-  name: "Causal Model Project",
-  extensions: ["cmprj", "json"],
-};
-const cmFactsFilter = {
-  name: "Causal Model Facts",
-  extensions: ["cm", "json"],
-};
-const jsonFilter = { name: "JSON", extensions: ["json"] };
-
-const projectFileFilters = [cmPrjFilter];
-const causalModelFactsFileFilters = [cmFactsFilter];
+const projectFileFilters = [
+  {
+    name: "Causal Bundle",
+    extensions: ["json"],
+  }
+];
 
 export class DataManager {
   /**

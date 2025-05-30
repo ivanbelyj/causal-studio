@@ -7,6 +7,7 @@ const { SplashScreen } = require("../../splash/splash-screen.js");
 const path = require("path");
 const { IpcManager } = require("./ipc/ipc-manager.js");
 const { ThemeManager } = require("./theme-manager.js");
+const { THEME } = require("./ipc/channels.js");
 
 // Creates the browser window
 async function createWindow(appLocale) {
@@ -77,6 +78,9 @@ app.whenReady().then(async () => {
 
   mainWindow.webContents.once('did-finish-load', () => {
     dataManager.createNewProject();
+
+    // Notify renderer process to set js-tree theme correctly
+    mainWindow.webContents.send(THEME.SET);
   });
 });
 

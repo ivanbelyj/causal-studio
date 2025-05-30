@@ -67,8 +67,8 @@ export class ProjectView {
     }
   }
 
-  #updateJsTreeTheme(isDarkMode) {
-    const newTheme = isDarkMode ? 'default-dark' : 'default';
+  #updateJsTreeTheme(isDarkTheme) {
+    const newTheme = isDarkTheme ? 'default-dark' : 'default';
     if (this.currentTheme !== newTheme) {
       this.currentTheme = newTheme;
       const instance = $(projectViewId).jstree(true);

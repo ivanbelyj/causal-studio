@@ -177,8 +177,8 @@ export class FixationResultsComponent {
             .style("margin-left", "1em")
             .style("padding", "0.25em 0.5em")
             .style("font-size", "0.7rem")
-            .style("min-width", "6em")
-            .text("Copy Occurred")
+            .style("min-width", "5em")
+            .text("Copy")
             .on("click", (event) => {
                 event.stopPropagation();
                 this.copyInstanceFactValues(instanceData, header.node());

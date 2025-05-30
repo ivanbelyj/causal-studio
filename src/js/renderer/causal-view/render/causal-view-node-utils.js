@@ -1,4 +1,5 @@
 import BlockUtils from "../../common/block-utils";
+import { StringUtils } from "../../common/string-utils";
 import { CausalModelUtils } from "../causal-model-utils";
 
 const maxNodeTextLength = 22;
@@ -76,8 +77,6 @@ export class CausalViewNodeUtils {
 
   // Todo: text truncating by width
   static truncateTextWithEllipsis(str) {
-    return str.length > maxNodeTextLength
-      ? str.slice(0, maxNodeTextLength - 3) + "..."
-      : str;
+    return StringUtils.truncateTextWithEllipsisByLength(str, maxNodeTextLength);
   }
 }

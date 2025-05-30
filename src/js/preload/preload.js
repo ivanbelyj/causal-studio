@@ -6,7 +6,7 @@
  * https://www.electronjs.org/docs/latest/tutorial/sandbox
  */
 const { ipcRenderer, contextBridge, ipcMain } = require("electron");
-const { DIALOG } = require("../main/ipc/channels");
+const { DIALOG, THEME } = require("../main/ipc/channels");
 
 contextBridge.exposeInMainWorld("api", {
   sendNodeEnter: () => send("node-enter"),
@@ -44,7 +44,9 @@ contextBridge.exposeInMainWorld("api", {
   onSavedToCurrentFile: (func) => on("on-saved-to-current-file", func),
 
   onFixationCompleted: (func) => on("fixation-completed", func),
-  onProbabilityEstimationCompleted: (func) => on("probability-estimation-completed", func)
+  onProbabilityEstimationCompleted: (func) => on("probability-estimation-completed", func),
+
+  onThemeSet: (func) => on(THEME.SET, func)
 });
 
 function invoke(channelName, data) {

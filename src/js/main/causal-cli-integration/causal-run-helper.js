@@ -102,7 +102,7 @@ export class CausalRunHelper {
     async runWithFilePicker(command) {
         const { filePaths } = await dialog.showOpenDialog({
             properties: ['openFile'],
-            filters: [{ name: 'Causal Bundle Files', extensions: ['json', 'cmprj'] }]
+            filters: [{ name: 'Causal Bundle Files', extensions: ['json'] }]
         });
 
         if (filePaths.length === 0) {
