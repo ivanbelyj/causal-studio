@@ -1,10 +1,9 @@
 import { CausalModelUtils } from "../causal-model-utils";
 import { CausalView } from "../causal-view";
 import * as d3 from "d3";
-import { NodeRenderer } from "../render/node-renderer";
 
 const nodeSelectionStrokeWidth = 4;
-const defaultSelectionColor = "#F5AE00";
+const defaultSelectionColor = "var(--default-node-selection)";
 
 export class SelectionRenderer {
   constructor(causalView, nodeAppearanceProvider) {

@@ -8,4 +8,7 @@
 
   --filter_hover: invert(15%);
   --filter_click: invert(30%);
+
+  --node-highlight: #00b7ff;
+  --default-node-selection: #F5AE00;
 }

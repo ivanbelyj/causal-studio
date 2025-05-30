@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import { SelectionRenderer } from "../causal-view/selection/selection-renderer";
 import BlockUtils from "../common/block-utils";
 
-const highlightColor = "#fde910";
+const highlightColor = "var(--node-highlight)";
 
 /**
  * Component for selecting nodes in a causal view with support for different node types
