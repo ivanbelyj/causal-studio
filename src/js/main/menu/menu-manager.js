@@ -1,4 +1,4 @@
-const { nativeTheme, shell, ipcMain, Menu, dialog } = require("electron");
+const { ipcMain, Menu, globalShortcut } = require("electron");
 const path = require("path");
 import { DataManager } from "../data-management/data-manager.js";
 import { DataStore } from "../data-management/data-store.js";
@@ -22,9 +22,9 @@ export class MenuManager {
     ipcMain.on("send-component-active", this.onSendComponentActive.bind(this));
 
     window.webContents.on("before-input-event", (event, input) => {
-      // accelerator not working
+      // For some reason, Ctrl+A accelerator is not working
       // if (input.control && input.code === "keyA") {
-      //   this.selectAllHandler();
+      //   this.menuActionHelper.selectAllHandler();
       // }
       if (input.control && input.code === "KeyZ") {
         this.menuActionHelper.undoHandler();

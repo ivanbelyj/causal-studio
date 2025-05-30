@@ -101,8 +101,11 @@ export default class MenuTemplateBuilder {
               { type: "separator" },
               {
                 label: "Select All",
-                accelerator: "CmdOrCtrl+A",
-                click: () => menuActionHelper.selectAllHandler(),
+                // For some reason, this accelerator doesn't work
+                // accelerator: "CmdOrCtrl+A",
+                click: () => {
+                  menuActionHelper.selectAllHandler();
+                },
               },
             ]),
         ],

@@ -7,10 +7,6 @@ import { AppThemeManager } from "./app-theme-manager";
 import MicroModal from "micromodal";
 
 export class Application {
-    constructor() {
-
-    }
-
     init() {
         const contextMenuManager = new AppContextMenuManager();
         contextMenuManager.init();

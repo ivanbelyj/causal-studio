@@ -43,6 +43,8 @@ export class CurrentFileManager {
       saveType = "save-as"; // The first save is similar to save-as
     }
 
+    let isCancelled = false;
+
     switch (saveType) {
       case "save-as":
         const saveRes = await FileUtils.saveByPathFromDialog(
@@ -50,7 +52,8 @@ export class CurrentFileManager {
           fileFilters ?? null,
           title
         );
-        if (!saveRes.canceled && isPrevPathSave) {
+        isCancelled = saveRes.canceled;
+        if (!isCancelled && isPrevPathSave) {
           this.currentFilePath = saveRes.filePath;
         }
         break;
@@ -59,7 +62,7 @@ export class CurrentFileManager {
         break;
     }
 
-    if (isPrevPathSave) {
+    if (isPrevPathSave && !isCancelled) {
       this.window.webContents.send("on-saved-to-current-file");
     }
   }
