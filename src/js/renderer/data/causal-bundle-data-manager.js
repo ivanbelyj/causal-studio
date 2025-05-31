@@ -147,6 +147,11 @@ export class CausalBundleDataManager extends EventTarget {
 
     const currentCausalModel = this.projectData.causalModels.find(
       x => x.name === currentCausalModelName);
+    if (!currentCausalModel) {
+      // Maybe the method was called before select another model
+      // and the current causal model was deleted
+      return;
+    }
 
     const { facts, blocks, nodesData } =
       this.currentCausalViewDataManager.getModelNodesData();

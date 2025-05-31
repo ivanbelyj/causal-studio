@@ -269,9 +269,11 @@ export class NodeRenderer {
         const fact = d.data.fact;
         let text = d.data.title
           ? d.data.title
-          : StringUtils.truncateTextWithEllipsisByLength(
-            fact.factValue.replaceAll("\n", " "),
-            56);
+          : fact
+            ? StringUtils.truncateTextWithEllipsisByLength(
+              fact.factValue.replaceAll("\n", " "),
+              56)
+            : CausalViewNodeUtils.getNodeId(d.data);
         if (this.#showProbabilityEstimationResults && fact) {
           const factProbabilityData = this.#getProbabilityDataByFactId(fact.id);
           if (factProbabilityData?.estimatedProbability) {
