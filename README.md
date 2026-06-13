@@ -6,9 +6,9 @@
 </div>
 
 ## 🚧 Current Status
-> **Under Active Development**  
-> I'm currently building the core functionality with exciting progress!
-> **Beta version expected:** Q4 2025
+> **Under Development**  
+> I'm building the functionality for the beta version, but currently working on my other projects (gamedev primarily).
+> Most of the features of Beta are already working, but some minor improvements are coming soon.
 
 ## ✨ Features
 - 💻 Causal models development
