@@ -34,7 +34,8 @@ export class NodeValueComponent extends BaseNodeComponent {
       isReadonly: false,
       useTextArea: true,
       isInnerProp: true,
-      shouldRenderCausalView: true
+      shouldRenderCausalView: true,
+      autoResizeTextArea: true
     });
     this.idInput = this.appendTextInputItem({
       name: "Id",

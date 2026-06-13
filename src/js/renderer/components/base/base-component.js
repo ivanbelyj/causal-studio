@@ -110,6 +110,19 @@ export class BaseComponent {
             ? this.dataProvider.getInner()
             : this.dataProvider.get();
         input.property("value", objToGetProp[propertyName] ?? "");
+
+        // Handle textarea auto-resize
+        if (input.node()?.tagName === 'TEXTAREA') {
+            setTimeout(() => this.adjustTextareaHeight(input), 0);
+        }
+    }
+
+    adjustTextareaHeight(textarea) {
+        const node = textarea.node();
+        if (node.tagName === 'TEXTAREA') {
+            node.style.height = 'auto';
+            node.style.height = node.scrollHeight + 'px';
+        }
     }
 
     appendTextInputItem(args) {
