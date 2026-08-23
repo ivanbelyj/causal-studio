@@ -19,14 +19,7 @@ export class NodeValueComponent extends BaseNodeComponent {
   }
 
   #renderFactNode() {
-    this.titleInput = this.appendTextInputItem({
-      name: "Title",
-      propName: "title",
-      inputId: "node-title-input",
-      dontShowLabel: true,
-      isInnerProp: false,
-      shouldRenderCausalView: true
-    });
+    this.#appendColorAndTitleInputRow();
     this.valueInput = this.appendTextInputItem({
       name: "Fact Value",
       propName: "factValue",
@@ -44,5 +37,27 @@ export class NodeValueComponent extends BaseNodeComponent {
       isReadonly: true,
       isInnerProp: true,
     });
+  }
+
+  #appendColorAndTitleInputRow()
+  {
+    const row = this.component
+      .append("div")
+      .attr("class", "input-item input-item-title-row");
+
+    const colorInput = row.append("input")
+      .attr("type", "color")
+      .attr("id", "node-color-input")
+      .attr("class", "input-item__input input-item-title-row__color-input");
+
+    this.titleInput = row.append("input")
+      .attr("type", "text")
+      .attr("id", "node-title-input")
+      .attr("class", "input-item__input input-item-title-row__text-input text-input")
+      .attr("placeholder", "Title");
+
+    const inputProps = { isInnerProp: false, shouldRenderCausalView: true };
+    this.propNameToData.set("color", { input: colorInput, ...inputProps });
+    this.propNameToData.set("title", { input: this.titleInput, ...inputProps });
   }
 }

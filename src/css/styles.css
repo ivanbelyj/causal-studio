@@ -108,7 +108,10 @@ body,
 
 .text-input,
 .button,
-.component__inner-item {
+.component__inner-item,
+.textarea,
+.input-item-title-row__color-input,
+.input-item-title-row__color-input::-webkit-color-swatch {
   border: 1px solid #949494;
 }
 
@@ -165,3 +168,33 @@ body .vakata-context li > a:hover
 }
 
 /* ===== End Js-Tree style fixes ===== */
+
+/* Node Value component - Color picker + Title */
+.input-item-title-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.input-item-title-row__color-input {
+  width: 2em;
+  height: 2em;
+  padding: 0;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-item-title-row__color-input::-webkit-color-swatch-wrapper {
+  padding: 0.38em;
+}
+
+.input-item-title-row__text-input {
+  flex: 1;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+/* End Node Value component - Color picker + Title */

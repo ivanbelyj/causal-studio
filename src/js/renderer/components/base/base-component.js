@@ -109,7 +109,13 @@ export class BaseComponent {
         const objToGetProp = isInnerProp
             ? this.dataProvider.getInner()
             : this.dataProvider.get();
-        input.property("value", objToGetProp[propertyName] ?? "");
+        
+        let value = objToGetProp[propertyName] ?? "";
+        if (input.node()?.type === "color" && value) {
+            value = d3.color(value)?.formatHex() ?? "#ffffff";
+        }
+        input.property("value", value);
+
 
         // Handle textarea auto-resize
         if (input.node()?.tagName === 'TEXTAREA') {
@@ -136,7 +142,7 @@ export class BaseComponent {
                 .attr("placeholder", args.name);
 
             if (!args.useTextArea) {
-                input.attr("type", "text");
+                input.attr("type", args.inputType ?? "text");
             }
             return input;
         }, args);
