@@ -102,6 +102,12 @@ export class CausalViewSelectionManager extends EventTarget {
       event.nodeData = this._structure.getNodeDataById(ids[0]);
     }
     this.dispatchEvent(event);
+
+    if (ids.length > 1) {
+      const multiEvent = new Event("multipleNodesSelected");
+      multiEvent.nodeIds = [...ids];
+      this.dispatchEvent(multiEvent);
+    }
   }
 
   onViewClicked(event) {

@@ -1,3 +1,4 @@
+import { BulkNodeColorComponent } from "../../components/node-components/bulk-node-color-component";
 import { DeclaredBlockComponent } from "../../components/node-components/declared-block-component";
 import { ExternalFactComponent } from "../../components/node-components/external-fact-component";
 import { NodeValueComponent } from "../../components/node-components/node-value-component";
@@ -31,4 +32,12 @@ export function createNodeComponent(args, container) {
     this.api,
     this.undoRedoManager)
   externalFactComponent.init();
+
+  const bulkNodeColorComponent = new BulkNodeColorComponent(
+    container.element,
+    causalView,
+    this.api,
+    this.undoRedoManager
+  );
+  bulkNodeColorComponent.init();
 }

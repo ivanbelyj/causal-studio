@@ -48,12 +48,12 @@ export class NodeValueComponent extends BaseNodeComponent {
     const colorInput = row.append("input")
       .attr("type", "color")
       .attr("id", "node-color-input")
-      .attr("class", "input-item__input input-item-title-row__color-input");
+      .attr("class", "color-input input-item__input input-item-title-row__color-input");
 
     this.titleInput = row.append("input")
       .attr("type", "text")
       .attr("id", "node-title-input")
-      .attr("class", "input-item__input input-item-title-row__text-input text-input")
+      .attr("class", "text-input input-item__input input-item-title-row__title-input")
       .attr("placeholder", "Title");
 
     const inputProps = { isInnerProp: false, shouldRenderCausalView: true };
