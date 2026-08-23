@@ -1,7 +1,10 @@
 import * as d3 from "d3";
 import { Command } from "../../undo-redo/commands/command";
 
-// TODO: Review AI-generated
+// TODO: Reuse logic with other color pickers.
+// TODO: Support color change for external nodes.
+
+// Todo: Review AI-generated
 export class BulkNodeColorComponent {
   constructor(selector, causalView, api, undoRedoManager) {
     this.component = d3.select(selector);
@@ -55,7 +58,7 @@ export class BulkNodeColorComponent {
 
     colorInput.property("value", this.#formatColorForInput(nodesData[0]?.color));
 
-    colorInput.on("input", () => {
+    colorInput.on("change", () => {
       const newColor = colorInput.property("value");
       this.#applyColor(nodeIds, newColor);
     });

@@ -57,7 +57,7 @@ export class NodeValueComponent extends BaseNodeComponent {
       .attr("placeholder", "Title");
 
     const inputProps = { isInnerProp: false, shouldRenderCausalView: true };
-    this.propNameToData.set("color", { input: colorInput, ...inputProps });
+    this.propNameToData.set("color", { input: colorInput, overrideInputEventName: "change", ...inputProps });
     this.propNameToData.set("title", { input: this.titleInput, ...inputProps });
   }
 }

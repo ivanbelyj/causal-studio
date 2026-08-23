@@ -54,10 +54,11 @@ export class BaseComponent {
                 isInnerProp,
                 shouldRenderCausalView,
                 overrideInputHandling,
-                processValueBeforeSet
+                processValueBeforeSet,
+                overrideInputEventName
             }]) => {
             // Apply the change to the actual data
-            input.on("input", () => {
+            input.on(overrideInputEventName ?? "input", () => {
                 // Custom applying to the actual data
                 let propertyValue = input.property("value");
                 propertyValue = processValueBeforeSet ? processValueBeforeSet(propertyValue) : propertyValue;
