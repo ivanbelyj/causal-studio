@@ -4,7 +4,7 @@ export const defaultLayoutConfig = {
     content: [
       {
         type: "column",
-        width: 22,// 15,
+        width: 10,
         content: [
           {
             type: "component",
@@ -29,7 +29,7 @@ export const defaultLayoutConfig = {
       },
       {
         type: "column",
-        width: 25,
+        width: 18,
         content: [
           {
             type: "component",

@@ -37,7 +37,7 @@ async function createWindow(appLocale) {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   mainWindow.webContents.once('did-finish-load', async () => {
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
     mainWindow.maximize();
 
     await splash.hide();
